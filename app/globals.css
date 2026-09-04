@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import 'leaflet/dist/leaflet.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -53,24 +54,24 @@ body {
 }
 
 :root {
-  --background: #f6f4ee;
-  --foreground: #18342e;
+  --background: #ffffff;
+  --foreground: #171717;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #2d6a58;
+  --primary: #171717;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: #eeeae0;
-  --muted-foreground: #687873;
+  --muted: #f2f2f2;
+  --muted-foreground: #737373;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #ddd9cf;
-  --input: #ddd9cf;
-  --ring: #2d6a58;
+  --border: #dedede;
+  --input: #d4d4d4;
+  --ring: #171717;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -131,4 +132,18 @@ body {
   html {
     @apply font-sans;
   }
+}
+
+.leaflet-container {
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: #e9e9e9;
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  body { background: white !important; }
+  .final-mode > :not(.final-overlay) { display: none !important; }
+  .no-print { display: none !important; }
+  .print-sheet { width: 210mm !important; min-height: 297mm; break-after: page; }
+  .leaflet-control-container { display: none !important; }
 }

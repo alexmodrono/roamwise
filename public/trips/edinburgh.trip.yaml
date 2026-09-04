@@ -1,0 +1,61 @@
+schema: roamwise/v1
+trip:
+  title: Edinburgh weekend
+  dates:
+    start: 2026-11-13
+    end: 2026-11-16
+  travellers: 2
+  currency: EUR
+  budget_per_person: 300
+  origin:
+    name: Madrid
+    code: MAD
+    coordinates: { lat: 40.4983, lng: -3.5676 }
+  destination:
+    name: Edinburgh
+    code: EDI
+    coordinates: { lat: 55.95, lng: -3.3725 }
+flights:
+  - id: ryanair-direct
+    airline: Ryanair
+    price_per_person: 81.8
+    outbound: { from: MAD, to: EDI, depart: 2026-11-13T10:20, arrive: 2026-11-13T12:15 }
+    return: { from: EDI, to: MAD, depart: 2026-11-16T10:00, arrive: 2026-11-16T13:55 }
+stays:
+  - id: dryden
+    name: Dryden Gardens
+    type: Private double room
+    address: Broughton, Edinburgh
+    coordinates: { lat: 55.97, lng: -3.185 }
+    price_total: 274
+    rating: "9.2"
+    image: /stays/dryden.jpg
+  - id: lavender
+    name: Lavender Guest House
+    type: Double room · en-suite
+    address: South Edinburgh
+    coordinates: { lat: 55.935, lng: -3.177 }
+    price_total: 310
+    rating: "8.9"
+    image: /stays/lavender.jpg
+  - id: moon
+    name: Moon suite apart
+    type: Entire 1-bed apartment · 47 m²
+    address: Grange, Edinburgh
+    coordinates: { lat: 55.936, lng: -3.19 }
+    price_total: 324
+    rating: New
+    image: /stays/moon.jpg
+  - id: suite
+    name: Suite 3 En-suite
+    type: Private en-suite double
+    address: Central Edinburgh
+    coordinates: { lat: 55.953, lng: -3.188 }
+    price_total: 344
+    rating: "9.0"
+    image: /stays/suite.jpg
+activities: []
+selected:
+  flight: ryanair-direct
+  stay: dryden
+  activities: []

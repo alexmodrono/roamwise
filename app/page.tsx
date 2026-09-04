@@ -1,192 +1,198 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BedDouble, CalendarDays, Check, ChevronRight, CirclePlus, ExternalLink,
-  Map as MapIcon, MapPin, Minus, Navigation, Plane, Plus, ReceiptText, Share2, Sparkles, Trash2, Users,
+  BedDouble, CalendarDays, Check, Code2, Download, ExternalLink, FileText,
+  Link2, LoaderCircle, MapPin, Plane, Plus, Share2, Sparkles, Upload, Users, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter,
-  DialogHeader, DialogTitle, DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { TripMap } from '@/components/trip-map';
+import { DEFAULT_TRIP, parseTrip, stringifyTrip, type Activity, type Flight, type Stay, type TripDocument } from '@/lib/trip-schema';
 
-type Option = { id: string; name: string; detail: string; subdetail?: string; rating?: string; price: number; url?: string; mapsUrl?: string; lat?: number; lng?: number; image?: string; custom?: boolean };
-type Activity = Option & { selected: boolean };
+type AddKind = 'flight' | 'stay' | 'activity';
+type Draft = { name: string; detail: string; address: string; price: string; image: string; url: string; lat: string; lng: string };
+const emptyDraft: Draft = { name: '', detail: '', address: '', price: '', image: '', url: '', lat: '', lng: '' };
 
-const initialFlights: Option[] = [
-  { id: 'ryanair', name: 'Ryanair · Direct return', detail: 'MAD 10:20 → EDI 12:15', subdetail: 'EDI 10:00 → MAD 13:55', price: 81.8, url: 'https://www.ryanair.com/es/es/trip/flights/select?adults=2&teens=0&children=0&infants=0&dateOut=2026-11-13&dateIn=2026-11-16&isConnectedFlight=false&originIata=MAD&destinationIata=EDI' },
-];
-
-const initialStays: Option[] = [
-  { id: 'dryden', name: 'Dryden Gardens', detail: 'Private double room', subdetail: 'Broughton · about 2 km to centre', rating: '9.2', price: 274, image: '/stays/dryden.jpg', lat: 55.970, lng: -3.185, mapsUrl: 'https://maps.apple.com/?q=Dryden+Gardens+Edinburgh', url: 'https://www.booking.com/hotel/gb/dryden-gardens.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'lavender', name: 'Lavender Guest House', detail: 'Double room · en-suite', subdetail: 'South Edinburgh', rating: '8.9', price: 310, image: '/stays/lavender.jpg', lat: 55.935, lng: -3.177, mapsUrl: 'https://maps.apple.com/?q=Lavender+Guest+House+Edinburgh', url: 'https://www.booking.com/hotel/gb/lavender-guest-house-edinburgh.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'moon', name: 'Moon suite apart', detail: 'Entire 1-bed apartment', subdetail: 'Grange · 47 m²', rating: 'New', price: 324, image: '/stays/moon.jpg', lat: 55.936, lng: -3.190, mapsUrl: 'https://maps.apple.com/?q=Moon+suite+apart+Edinburgh', url: 'https://www.booking.com/searchresults.html?ss=Moon%20suite%20apart%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'suite', name: 'Suite 3 En-suite', detail: 'Private en-suite double', subdetail: 'Central Edinburgh', rating: '9.0', price: 344, image: '/stays/suite.jpg', lat: 55.953, lng: -3.188, mapsUrl: 'https://maps.apple.com/?q=Suite+3+En-suite+Room+Edinburgh', url: 'https://www.booking.com/searchresults.html?ss=Suite%203%20En-suite%20Room%20with%20Double%20Bed%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-];
-
-const euro = (value: number) => new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR', minimumFractionDigits: value % 1 ? 2 : 0 }).format(value);
+function money(value: number, currency = 'EUR') {
+  return new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: value % 1 ? 2 : 0 }).format(value || 0);
+}
+function shortDate(value: string) { return new Date(`${value}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+function time(value?: string) { return value?.split('T')[1]?.slice(0, 5) ?? '—'; }
+function safeId(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `item-${Date.now()}`; }
 
 export default function Home() {
-  const [travellers, setTravellers] = useState(2);
-  const [flights, setFlights] = useState<Option[]>(initialFlights);
-  const [stays, setStays] = useState<Option[]>(initialStays);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [selectedFlight, setSelectedFlight] = useState('ryanair');
-  const [selectedStay, setSelectedStay] = useState('dryden');
-  const [cabinBag, setCabinBag] = useState(false);
-  const [addType, setAddType] = useState<'flight' | 'stay' | 'activity'>('activity');
-  const [newName, setNewName] = useState('');
-  const [newPrice, setNewPrice] = useState('');
-  const [newDetail, setNewDetail] = useState('');
-  const [newLocation, setNewLocation] = useState('');
-  const [newImage, setNewImage] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [shareLabel, setShareLabel] = useState('Share trip');
+  const [trip, setTrip] = useState<TripDocument>(DEFAULT_TRIP);
+  const [source, setSource] = useState(() => stringifyTrip(DEFAULT_TRIP));
+  const [view, setView] = useState<'plan' | 'source'>('plan');
+  const [sourceError, setSourceError] = useState('');
+  const [link, setLink] = useState('');
+  const [linkState, setLinkState] = useState<'idle' | 'loading' | 'done' | 'fallback'>('idle');
+  const [addKind, setAddKind] = useState<AddKind | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [finalOpen, setFinalOpen] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem('roamwise-edinburgh');
-    if (!raw) return;
-    try {
-      const saved = JSON.parse(raw);
-      if (saved.travellers) setTravellers(saved.travellers);
-      if (saved.flights) setFlights(saved.flights.map((item: Option) => ({ ...initialFlights.find((base) => base.id === item.id), ...item })));
-      if (saved.stays) setStays(saved.stays.map((item: Option) => ({ ...initialStays.find((base) => base.id === item.id), ...item })));
-      if (saved.activities) setActivities(saved.activities);
-      if (saved.selectedFlight) setSelectedFlight(saved.selectedFlight);
-      if (saved.selectedStay) setSelectedStay(saved.selectedStay);
-      if (typeof saved.cabinBag === 'boolean') setCabinBag(saved.cabinBag);
-    } catch { /* Ignore malformed local drafts. */ }
+    const stored = localStorage.getItem('roamwise-trip-v2');
+    if (!stored) return;
+    try { const parsed = parseTrip(stored); setTrip(parsed); setSource(stringifyTrip(parsed)); } catch { /* Keep the bundled example. */ }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('roamwise-edinburgh', JSON.stringify({ travellers, flights, stays, activities, selectedFlight, selectedStay, cabinBag }));
-  }, [travellers, flights, stays, activities, selectedFlight, selectedStay, cabinBag]);
-
-  const flight = flights.find((item) => item.id === selectedFlight) ?? flights[0];
-  const stay = stays.find((item) => item.id === selectedStay) ?? stays[0];
-  const activitiesTotal = activities.filter((item) => item.selected).reduce((sum, item) => sum + item.price, 0);
-  const flightsTotal = flight ? flight.price * travellers : 0;
-  const bagTotal = cabinBag ? 30 * travellers : 0;
-  const total = flightsTotal + bagTotal + (stay?.price ?? 0) + activitiesTotal;
-  const perPerson = total / travellers;
-  const budgetMax = 300;
-  const budgetDelta = budgetMax - perPerson;
-
-  function addOption() {
-    const price = Number(newPrice);
-    if (!newName.trim() || !Number.isFinite(price) || price < 0) return;
-    const item = { id: `${addType}-${Date.now()}`, name: newName.trim(), detail: newDetail.trim() || 'Custom option', subdetail: newLocation.trim() || undefined, image: newImage.trim() || undefined, mapsUrl: newLocation.trim() ? `https://maps.apple.com/?q=${encodeURIComponent(`${newName.trim()} ${newLocation.trim()}`)}` : undefined, price, custom: true };
-    if (addType === 'flight') { setFlights((v) => [...v, item]); setSelectedFlight(item.id); }
-    if (addType === 'stay') { setStays((v) => [...v, item]); setSelectedStay(item.id); }
-    if (addType === 'activity') setActivities((v) => [...v, { ...item, selected: true }]);
-    setNewName(''); setNewPrice(''); setNewDetail(''); setNewLocation(''); setNewImage(''); setDialogOpen(false);
+  function commit(next: TripDocument) {
+    setTrip(next);
+    const yaml = stringifyTrip(next);
+    setSource(yaml);
+    localStorage.setItem('roamwise-trip-v2', yaml);
   }
 
-  function removeCustom(type: 'flight' | 'stay' | 'activity', id: string) {
-    if (type === 'flight') { setFlights((v) => v.filter((x) => x.id !== id)); if (selectedFlight === id) setSelectedFlight('ryanair'); }
-    if (type === 'stay') { setStays((v) => v.filter((x) => x.id !== id)); if (selectedStay === id) setSelectedStay('dryden'); }
-    if (type === 'activity') setActivities((v) => v.filter((x) => x.id !== id));
+  const selectedFlight = trip.flights.find((item) => item.id === trip.selected.flight);
+  const selectedStay = trip.stays.find((item) => item.id === trip.selected.stay);
+  const selectedActivities = trip.activities.filter((item) => trip.selected.activities.includes(item.id));
+  const total = (selectedFlight?.price_per_person ?? 0) * trip.trip.travellers + (selectedStay?.price_total ?? 0) + selectedActivities.reduce((sum, item) => sum + item.price_total, 0);
+  const perPerson = total / Math.max(1, trip.trip.travellers);
+
+  function applySource() {
+    try { const parsed = parseTrip(source); commit(parsed); setSourceError(''); setView('plan'); }
+    catch (error) { setSourceError(error instanceof Error ? error.message : 'Invalid YAML'); }
   }
 
-  async function shareTrip() {
-    const summary = `Edinburgh weekend · ${euro(perPerson)} per person\nFlight: ${flight?.name}\nStay: ${stay?.name}${activitiesTotal ? `\nActivities: ${euro(activitiesTotal)} total` : ''}`;
+  async function readTripFile(file?: File) {
+    if (!file) return;
+    try { const parsed = parseTrip(await file.text()); commit(parsed); setSourceError(''); setView('plan'); }
+    catch (error) { setSourceError(error instanceof Error ? error.message : 'Could not read this trip file'); setView('source'); }
+  }
+
+  function downloadTrip() {
+    const blob = new Blob([stringifyTrip(trip)], { type: 'application/yaml' });
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = `${safeId(trip.trip.title)}.trip.yaml`; anchor.click(); URL.revokeObjectURL(url);
+  }
+
+  async function importListing() {
+    if (!link.trim()) return;
+    setLinkState('loading');
+    let data: Record<string, unknown> = {};
     try {
-      if (navigator.share) await navigator.share({ title: 'Edinburgh weekend', text: summary });
-      else await navigator.clipboard.writeText(summary);
-      setShareLabel('Copied!'); setTimeout(() => setShareLabel('Share trip'), 1800);
-    } catch { /* User cancelled share. */ }
+      const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: link.trim() }) });
+      data = await response.json() as Record<string, unknown>;
+      if (!response.ok) throw new Error(String(data.error ?? 'Import failed'));
+      setLinkState('done');
+    } catch { setLinkState('fallback'); }
+    const host = (() => { try { return new URL(link).hostname.replace('www.', ''); } catch { return 'Imported stay'; } })();
+    const coordinate = data.coordinates as { lat?: number; lng?: number } | undefined;
+    const stay: Stay = {
+      id: `${safeId(String(data.title ?? host))}-${Date.now()}`,
+      name: String(data.title ?? `Stay from ${host}`),
+      type: String(data.description ?? 'Imported listing — add any missing details'),
+      address: data.address ? String(data.address) : trip.trip.destination.name,
+      coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : undefined,
+      price_total: Number(data.price) || 0,
+      image: data.image ? String(data.image) : undefined,
+      url: link.trim(),
+    };
+    commit({ ...trip, stays: [...trip.stays, stay], selected: { ...trip.selected, stay: stay.id } });
+    if (!data.title || (!data.image && !data.address)) {
+      setEditingId(stay.id);
+      setDraft({ name: stay.name, detail: stay.type ?? '', address: stay.address ?? '', price: '', image: '', url: stay.url ?? '', lat: '', lng: '' });
+      setAddKind('stay');
+    }
+    setLink(''); setTimeout(() => setLinkState('idle'), 2800);
   }
 
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-white/10 bg-[#17342e] text-white">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-xl bg-[#f4bd62] text-[#17342e]"><MapPin size={18} strokeWidth={2.4} /></div>
-            <div><p className="text-[15px] font-semibold leading-none">Roamwise</p><p className="mt-1 text-xs text-white/55">Trips, decided together</p></div>
-          </div>
-          <Button onClick={shareTrip} className="rounded-xl bg-white/10 text-white hover:bg-white/15"><Share2 /> {shareLabel}</Button>
+  function addEntry() {
+    if (!addKind || !draft.name.trim()) return;
+    const coordinates = Number.isFinite(Number(draft.lat)) && Number.isFinite(Number(draft.lng)) && draft.lat && draft.lng ? { lat: Number(draft.lat), lng: Number(draft.lng) } : undefined;
+    const id = `${safeId(draft.name)}-${Date.now()}`;
+    if (addKind === 'stay') {
+      const item: Stay = { id, name: draft.name, type: draft.detail, address: draft.address, price_total: Number(draft.price) || 0, image: draft.image || undefined, url: draft.url || undefined, coordinates };
+      if (editingId) commit({ ...trip, stays: trip.stays.map((existing) => existing.id === editingId ? { ...existing, ...item, id: editingId } : existing), selected: { ...trip.selected, stay: editingId } });
+      else commit({ ...trip, stays: [...trip.stays, item], selected: { ...trip.selected, stay: id } });
+    } else if (addKind === 'activity') {
+      const item: Activity = { id, name: draft.name, address: draft.address, price_total: Number(draft.price) || 0, image: draft.image || undefined, url: draft.url || undefined, coordinates };
+      commit({ ...trip, activities: [...trip.activities, item], selected: { ...trip.selected, activities: [...trip.selected.activities, id] } });
+    } else {
+      const origin = trip.trip.origin.code ?? trip.trip.origin.name; const destination = trip.trip.destination.code ?? trip.trip.destination.name;
+      const item: Flight = { id, airline: draft.name, price_per_person: Number(draft.price) || 0, url: draft.url || undefined, outbound: { from: origin, to: destination, depart: `${trip.trip.dates.start}T00:00`, arrive: `${trip.trip.dates.start}T00:00` }, return: { from: destination, to: origin, depart: `${trip.trip.dates.end}T00:00`, arrive: `${trip.trip.dates.end}T00:00` } };
+      commit({ ...trip, flights: [...trip.flights, item], selected: { ...trip.selected, flight: id } });
+    }
+    setDraft(emptyDraft); setEditingId(null); setAddKind(null);
+  }
+
+  function toggleActivity(id: string, checked: boolean) {
+    const activities = checked ? [...trip.selected.activities, id] : trip.selected.activities.filter((item) => item !== id);
+    commit({ ...trip, selected: { ...trip.selected, activities: [...new Set(activities)] } });
+  }
+
+  return <main onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void readTripFile(event.dataTransfer.files[0]); }} className={`min-h-screen bg-white text-[#171717] ${finalOpen ? 'final-mode' : ''}`}>
+    {dragging && <div className="fixed inset-3 z-[100] grid place-items-center rounded-2xl border-2 border-dashed border-blue-600 bg-blue-50/95"><div className="text-center"><Upload className="mx-auto mb-3 text-blue-600" /><p className="font-semibold">Drop a .trip.yaml file</p></div></div>}
+    <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2.5"><div className="grid size-8 place-items-center rounded-lg bg-black text-white"><MapPin size={16} /></div><span className="font-semibold tracking-tight">Roamwise</span><span className="hidden text-sm text-black/35 sm:inline">/ {trip.trip.title}</span></div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="mr-1 hidden rounded-lg bg-[#f1f1f1] p-1 sm:flex"><button onClick={() => setView('plan')} className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === 'plan' ? 'bg-white shadow-sm' : 'text-black/50'}`}>Plan</button><button onClick={() => setView('source')} className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === 'source' ? 'bg-white shadow-sm' : 'text-black/50'}`}><Code2 className="mr-1 inline size-3" /> YAML</button></div>
+          <Button onClick={() => fileInput.current?.click()} variant="ghost" size="sm"><Upload /> <span className="hidden sm:inline">Load</span></Button><input ref={fileInput} type="file" accept=".yaml,.yml,text/yaml" className="hidden" onChange={(event) => void readTripFile(event.target.files?.[0])} />
+          <Button onClick={downloadTrip} variant="ghost" size="sm"><Download /> <span className="hidden sm:inline">Save</span></Button>
+          <Button onClick={() => setFinalOpen(true)} size="sm" className="bg-black text-white hover:bg-black/75"><FileText /> Final version</Button>
         </div>
-      </header>
-
-      <section className="border-b bg-[#17342e] text-white">
-        <div className="mx-auto max-w-[1440px] px-5 pb-7 pt-5 lg:px-8">
-          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-[#f4bd62]"><span className="h-px w-5 bg-[#f4bd62]" /> Trip board</div>
-              <h1 className="font-heading text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Edinburgh weekend</h1>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/65">
-                <span className="flex items-center gap-2"><CalendarDays size={15} /> 13–16 Nov 2026</span>
-                <span className="flex items-center gap-2"><MapPin size={15} /> Madrid → Edinburgh</span>
-                <span className="flex items-center gap-2"><Users size={15} /> <button aria-label="Remove traveller" className="rounded hover:text-white" onClick={() => setTravellers((v) => Math.max(1, v - 1))}><Minus size={13} /></button><strong className="text-white">{travellers}</strong><button aria-label="Add traveller" className="rounded hover:text-white" onClick={() => setTravellers((v) => Math.min(12, v + 1))}><Plus size={13} /></button> travellers</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <img src="/og.png" alt="Edinburgh Castle illustration" className="hidden h-[74px] w-[142px] rounded-2xl border border-white/10 object-cover object-right lg:block" />
-              <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-sm text-white/70">Budget <strong className="ml-2 text-white">€200–300 / person</strong></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="mx-auto grid max-w-[1440px] gap-6 px-5 py-7 lg:grid-cols-[minmax(0,1fr)_350px] lg:px-8">
-        <div className="min-w-0 space-y-8">
-          <OptionSection icon={<Plane size={18} />} step="1" title="Choose a flight" subtitle="Prices are per person" onAdd={() => { setAddType('flight'); setDialogOpen(true); }}>
-            <div className="grid gap-3">
-              {flights.map((item) => <OptionRow key={item.id} item={item} selected={item.id === selectedFlight} priceLabel={`${euro(item.price)} / person`} onSelect={() => setSelectedFlight(item.id)} onRemove={item.custom ? () => removeCustom('flight', item.id) : undefined} />)}
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-[#c8c1b4] bg-[#f2eee5]/70 px-4 py-3 text-sm"><span className="flex items-center gap-3"><Checkbox checked={cabinBag} onCheckedChange={(checked) => setCabinBag(Boolean(checked))} /><span><strong>Add 10 kg cabin bag</strong><small className="ml-2 text-muted-foreground">Priority boarding</small></span></span><strong>+€30 pp</strong></label>
-            </div>
-          </OptionSection>
-
-          <OptionSection icon={<BedDouble size={18} />} step="2" title="Pick a place to stay" subtitle="3 nights · total for everyone" onAdd={() => { setAddType('stay'); setDialogOpen(true); }}>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {stays.map((item) => <StayCard key={item.id} item={item} selected={item.id === selectedStay} travellers={travellers} onSelect={() => setSelectedStay(item.id)} onRemove={item.custom ? () => removeCustom('stay', item.id) : undefined} />)}
-            </div>
-            {stay && <MapPanel stay={stay} />}
-          </OptionSection>
-
-          <OptionSection icon={<Sparkles size={18} />} step="3" title="Add activities" subtitle="Optional · total for everyone" onAdd={() => { setAddType('activity'); setDialogOpen(true); }}>
-            {activities.length === 0 ? <button onClick={() => { setAddType('activity'); setDialogOpen(true); }} className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#c8c1b4] bg-white/45 p-5 text-left transition-colors hover:bg-white"><span><strong className="text-sm">Nothing planned yet</strong><span className="mt-1 block text-sm text-muted-foreground">Add castle tickets, a tour, dinner—or anything else.</span></span><CirclePlus className="text-[#2d6a58]" /></button> : <div className="grid gap-3 sm:grid-cols-2">{activities.map((item) => <label key={item.id} className={`flex cursor-pointer gap-3 overflow-hidden rounded-2xl border bg-white p-3 ${item.selected ? 'border-[#2d6a58]' : ''}`}>{item.image ? <img src={item.image} alt={`${item.name} visual preview`} className="size-20 shrink-0 rounded-xl object-cover" /> : <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-[#f4efe4] text-[#8d5b24]"><Sparkles size={20} /></div>}<Checkbox className="mt-1" checked={item.selected} onCheckedChange={(checked) => setActivities((v) => v.map((x) => x.id === item.id ? { ...x, selected: Boolean(checked) } : x))} /><span className="min-w-0 flex-1"><strong className="block truncate text-sm">{item.name}</strong><small className="mt-1 block truncate text-muted-foreground">{item.detail}</small><small className="mt-2 flex items-center gap-1 text-muted-foreground"><MapPin size={11} /> {item.subdetail ?? 'Location not added'}</small></span><span className="text-right"><strong className="text-sm">{euro(item.price)}</strong><button onClick={(event) => { event.preventDefault(); removeCustom('activity', item.id); }} className="mt-4 block rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={`Remove ${item.name}`}><Trash2 size={15} /></button></span></label>)}</div>}
-          </OptionSection>
-        </div>
-
-        <aside className="lg:sticky lg:top-6 lg:self-start">
-          <div className="overflow-hidden rounded-3xl bg-[#17342e] text-white shadow-[0_18px_50px_rgba(23,52,46,0.18)]">
-            <div className="border-b border-white/10 p-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f4bd62]">Your trip total</p><div className="mt-2 flex items-baseline gap-2"><span className="text-4xl font-semibold tracking-[-0.05em]">{euro(perPerson)}</span><span className="text-sm text-white/55">per person</span></div><p className={`mt-2 text-sm ${budgetDelta >= 0 ? 'text-[#9cd2bb]' : 'text-[#f0a49b]'}`}>{budgetDelta >= 0 ? `${euro(budgetDelta)} below your max budget` : `${euro(Math.abs(budgetDelta))} over your max budget`}</p><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${perPerson <= budgetMax ? 'bg-[#f4bd62]' : 'bg-[#e97d70]'}`} style={{ width: `${Math.min(100, perPerson / budgetMax * 100)}%` }} /></div></div>
-            <div className="space-y-4 p-6 text-sm"><PriceRow label="Return flights" value={flightsTotal} /><PriceRow label={cabinBag ? 'Cabin bags' : 'Cabin bags · not added'} value={bagTotal} muted={!cabinBag} /><PriceRow label={stay?.name ?? 'No stay'} value={stay?.price ?? 0} />{activitiesTotal > 0 && <PriceRow label="Activities" value={activitiesTotal} />}<div className="h-px bg-white/10" /><div className="flex justify-between font-semibold"><span>Total for {travellers}</span><span>{euro(total)}</span></div></div>
-            <div className="bg-white/[0.06] p-6">
-              <Dialog><DialogTrigger render={<Button className="w-full rounded-xl bg-[#f4bd62] text-[#17342e] hover:bg-[#ffd180]" />}><ReceiptText /> View decision summary</DialogTrigger><DialogContent className="max-w-lg rounded-2xl p-6"><DialogHeader><DialogTitle className="text-xl">Edinburgh weekend</DialogTitle><DialogDescription>Your selected plan, ready to book.</DialogDescription></DialogHeader><div className="my-2 space-y-3 rounded-xl bg-muted p-4"><SummaryLine label="Dates" value="13–16 Nov 2026" /><SummaryLine label="Flight" value={flight?.name ?? '—'} /><SummaryLine label="Stay" value={stay?.name ?? '—'} /><SummaryLine label="Travellers" value={String(travellers)} /></div><div className="flex items-end justify-between"><span className="text-sm text-muted-foreground">Final price per person</span><strong className="text-2xl">{euro(perPerson)}</strong></div><DialogFooter className="mt-2"><DialogClose render={<Button onClick={shareTrip} className="bg-[#2d6a58]" />}><Share2 /> Share summary</DialogClose></DialogFooter></DialogContent></Dialog>
-              <p className="mt-3 text-center text-xs text-white/40">Changes save automatically on this device</p>
-            </div>
-          </div>
-          <div className="mt-4 rounded-2xl border bg-white/65 p-4 text-xs leading-relaxed text-muted-foreground"><strong className="text-foreground">Price check</strong><br />Flight and stay prices were checked 1 Sep 2026. Open each booking link before paying.</div>
-        </aside>
       </div>
+    </header>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}><DialogContent className="rounded-2xl p-6 sm:max-w-md"><DialogHeader><DialogTitle>Add {addType}</DialogTitle><DialogDescription>{addType === 'flight' ? 'Enter the return price per person.' : 'Enter the total price for everyone.'}</DialogDescription></DialogHeader><div className="space-y-4 py-2"><label className="block text-sm font-medium">Name<Input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)} className="mt-2 h-10" placeholder={addType === 'activity' ? 'Ghost tour' : `New ${addType} option`} /></label><label className="block text-sm font-medium">Details<Input value={newDetail} onChange={(e) => setNewDetail(e.target.value)} className="mt-2 h-10" placeholder={addType === 'flight' ? 'Times, airline, stops…' : 'Room type, duration, notes…'} /></label>{addType !== 'flight' && <label className="block text-sm font-medium">Location<Input value={newLocation} onChange={(e) => setNewLocation(e.target.value)} className="mt-2 h-10" placeholder="Neighbourhood or address" /></label>}<label className="block text-sm font-medium">Photo URL <span className="font-normal text-muted-foreground">(optional)</span><Input type="url" value={newImage} onChange={(e) => setNewImage(e.target.value)} className="mt-2 h-10" placeholder="https://…" /></label><label className="block text-sm font-medium">Price in euros<Input type="number" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addOption()} className="mt-2 h-10" placeholder="0" /></label></div><DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button onClick={addOption} className="bg-[#2d6a58]">Add to trip</Button></DialogFooter></DialogContent></Dialog>
-    </main>
-  );
+    <div className="mx-auto grid max-w-[1600px] lg:grid-cols-[minmax(520px,58%)_minmax(400px,42%)]">
+      <section className="min-w-0 px-4 py-6 sm:px-6 lg:min-h-[calc(100vh-64px)] lg:border-r lg:px-8">
+        {view === 'source' ? <SourceEditor source={source} setSource={setSource} error={sourceError} onApply={applySource} onDownload={downloadTrip} /> : <div className="mx-auto max-w-3xl space-y-8">
+          <div className="flex flex-col justify-between gap-4 border-b pb-6 sm:flex-row sm:items-end">
+            <div><p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-black/40">Trip plan</p><h1 className="text-3xl font-semibold tracking-[-0.04em]">{trip.trip.title}</h1><div className="mt-3 flex flex-wrap gap-4 text-sm text-black/50"><span className="flex items-center gap-1.5"><CalendarDays size={14} /> {shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)}</span><span className="flex items-center gap-1.5"><Users size={14} /> {trip.trip.travellers} travellers</span></div></div>
+            <div className="text-left sm:text-right"><p className="text-3xl font-semibold tracking-[-0.04em]">{money(perPerson, trip.trip.currency)}</p><p className="text-xs text-black/45">per person · {money(total, trip.trip.currency)} total</p></div>
+          </div>
+
+          <Section title="Flights" icon={<Plane size={17} />} action={() => { setDraft(emptyDraft); setAddKind('flight'); }}>
+            <div className="space-y-2">{trip.flights.map((item) => <button key={item.id} onClick={() => commit({ ...trip, selected: { ...trip.selected, flight: item.id } })} className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left ${trip.selected.flight === item.id ? 'border-black bg-[#fafafa]' : 'hover:bg-[#fafafa]'}`}><SelectDot selected={trip.selected.flight === item.id} /><div className="min-w-0 flex-1"><p className="font-medium">{item.airline}</p><p className="mt-1 truncate text-sm text-black/45">{item.outbound.from} {time(item.outbound.depart)} → {item.outbound.to} {time(item.outbound.arrive)} · return {time(item.return.depart)}</p></div><strong className="text-sm">{money(item.price_per_person, trip.trip.currency)} pp</strong>{item.url && <External item={item.url} label="Flight listing" />}</button>)}</div>
+          </Section>
+
+          <Section title="Stays" icon={<BedDouble size={17} />} action={() => { setEditingId(null); setDraft(emptyDraft); setAddKind('stay'); }}>
+            <div className="mb-3 flex gap-2"><Input value={link} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void importListing()} placeholder="Paste an Airbnb or Booking.com link" className="h-10" /><Button onClick={() => void importListing()} disabled={linkState === 'loading'} className="h-10 bg-black text-white"><span className="hidden sm:inline">Import listing</span>{linkState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Link2 />}</Button></div>
+            {linkState === 'done' && <p className="mb-3 text-xs text-green-700">Listing details loaded. Check the price before deciding.</p>}{linkState === 'fallback' && <p className="mb-3 text-xs text-amber-700">The site blocked its preview, so the link was added as an editable entry.</p>}
+            <div className="grid gap-3 sm:grid-cols-2">{trip.stays.map((item) => <div key={item.id} className={`overflow-hidden rounded-xl border text-left transition ${trip.selected.stay === item.id ? 'border-black ring-1 ring-black' : 'hover:border-black/35'}`}><button onClick={() => commit({ ...trip, selected: { ...trip.selected, stay: item.id } })} className="block w-full text-left"><div className="relative h-28 bg-[#eee]">{item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-black/25"><BedDouble /></div>}<span className={`absolute right-2 top-2 grid size-6 place-items-center rounded-full ${trip.selected.stay === item.id ? 'bg-black text-white' : 'bg-white text-transparent'}`}><Check size={13} /></span></div><div className="px-4 pt-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-medium">{item.name}</p><p className="mt-1 truncate text-xs text-black/45">{item.type ?? 'Stay'}</p></div>{item.rating && <span className="rounded bg-[#f0f0f0] px-1.5 py-1 text-[11px] font-medium">{item.rating}</span>}</div><p className="mt-3 flex items-center gap-1 text-xs text-black/45"><MapPin size={11} /> {item.address ?? 'Location not added'}</p></div></button><div className="mx-4 mt-3 flex items-center justify-between border-t py-3"><strong>{money(item.price_total, trip.trip.currency)}</strong><div className="flex items-center gap-2"><button onClick={() => { setEditingId(item.id); setDraft({ name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '' }); setAddKind('stay'); }} className="text-xs text-black/45 hover:text-black">Edit</button>{item.url && <External item={item.url} label="Stay listing" />}</div></div></div>)}</div>
+          </Section>
+
+          <Section title="Activities" icon={<Sparkles size={17} />} action={() => { setDraft(emptyDraft); setAddKind('activity'); }}>
+            {trip.activities.length ? <div className="space-y-2">{trip.activities.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl border p-3"><Checkbox checked={trip.selected.activities.includes(item.id)} onCheckedChange={(checked) => toggleActivity(item.id, Boolean(checked))} />{item.image ? <img src={item.image} alt="" className="size-12 rounded-lg object-cover" /> : <div className="grid size-12 place-items-center rounded-lg bg-[#f2f2f2]"><Sparkles size={16} /></div>}<div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{item.name}</p><p className="mt-1 truncate text-xs text-black/45">{item.address ?? 'Location not added'}</p></div><strong className="text-sm">{money(item.price_total, trip.trip.currency)}</strong></label>)}</div> : <button onClick={() => { setDraft(emptyDraft); setAddKind('activity'); }} className="flex w-full items-center justify-between rounded-xl border border-dashed p-5 text-left text-sm text-black/45 hover:bg-[#fafafa]"><span>Add restaurants, tickets, tours or anything with a location.</span><Plus size={16} /></button>}
+          </Section>
+
+          <button onClick={() => setView('source')} className="flex w-full items-center justify-between rounded-xl bg-[#f4f4f4] p-4 text-left"><span><strong className="block text-sm">Portable trip source</strong><small className="mt-1 block text-black/45">Edit, download or ask a coding agent to generate roamwise/v1 YAML.</small></span><Code2 size={18} /></button>
+        </div>}
+      </section>
+      <aside className="h-[56vh] overflow-hidden border-t lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] lg:border-t-0"><TripMap trip={trip} /></aside>
+    </div>
+
+    <AddEntryDialog kind={addKind} editing={Boolean(editingId)} draft={draft} setDraft={setDraft} onClose={() => { setAddKind(null); setEditingId(null); }} onAdd={addEntry} />
+    {finalOpen && <FinalVersion trip={trip} total={total} perPerson={perPerson} flight={selectedFlight} stay={selectedStay} activities={selectedActivities} onClose={() => setFinalOpen(false)} />}
+  </main>;
 }
 
-function OptionSection({ icon, step, title, subtitle, onAdd, children }: { icon: React.ReactNode; step: string; title: string; subtitle: string; onAdd: () => void; children: React.ReactNode }) {
-  return <section><div className="mb-3 flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-xl bg-[#e5eee9] text-[#2d6a58]">{icon}</div><div><h2 className="text-lg font-semibold tracking-tight"><span className="text-muted-foreground">{step}.</span> {title}</h2><p className="text-sm text-muted-foreground">{subtitle}</p></div></div><Button onClick={onAdd} variant="outline" size="sm" className="rounded-xl bg-white"><Plus /> Add option</Button></div>{children}</section>;
+function Section({ title, icon, action, children }: { title: string; icon: React.ReactNode; action: () => void; children: React.ReactNode }) {
+  return <section><div className="mb-3 flex items-center justify-between"><h2 className="flex items-center gap-2 text-base font-semibold">{icon}{title}</h2><Button onClick={action} variant="ghost" size="sm"><Plus /> Add</Button></div>{children}</section>;
+}
+function SelectDot({ selected }: { selected: boolean }) { return <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selected ? 'border-black bg-black text-white' : 'text-transparent'}`}><Check size={12} /></span>; }
+function External({ item, label }: { item: string; label: string }) { return <a href={item} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" aria-label={label} className="rounded p-1 text-black/35 hover:bg-black/5 hover:text-black"><ExternalLink size={14} /></a>; }
+
+function SourceEditor({ source, setSource, error, onApply, onDownload }: { source: string; setSource: (value: string) => void; error: string; onApply: () => void; onDownload: () => void }) {
+  return <div className="mx-auto max-w-3xl"><div className="mb-5 flex items-end justify-between"><div><p className="text-xs font-medium uppercase tracking-[0.14em] text-black/40">Portable source</p><h1 className="mt-2 text-2xl font-semibold">Trip YAML</h1><p className="mt-2 max-w-xl text-sm text-black/50">The visual plan is generated from this file. Edit it here, drop in another <code>.trip.yaml</code>, or give the format to a coding agent.</p></div><Button onClick={onDownload} variant="outline"><Download /> Download</Button></div><Textarea value={source} onChange={(event) => setSource(event.target.value)} spellCheck={false} className="min-h-[65vh] resize-y rounded-xl bg-[#111] p-5 font-mono text-[13px] leading-6 text-[#ededed]" />{error && <p className="mt-3 text-sm text-red-600">{error}</p>}<div className="mt-4 flex items-center justify-between"><a href="/trips/edinburgh.trip.yaml" download className="text-xs text-black/45 underline underline-offset-4">Example file</a><Button onClick={onApply} className="bg-black text-white">Apply YAML</Button></div></div>;
 }
 
-function OptionRow({ item, selected, priceLabel, onSelect, onRemove }: { item: Option; selected: boolean; priceLabel: string; onSelect: () => void; onRemove?: () => void }) {
-  return <div className={`flex items-center gap-4 rounded-2xl border bg-white p-4 transition-all ${selected ? 'border-[#2d6a58] ring-1 ring-[#2d6a58]' : 'hover:border-[#9bb9ad]'}`}><button onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-4 text-left"><div className={`grid size-10 shrink-0 place-items-center rounded-xl ${selected ? 'bg-[#17342e] text-white' : 'bg-muted'}`}><Plane size={18} /></div><div className="min-w-0"><p className="font-semibold">{item.name}</p><p className="mt-1 truncate text-sm text-muted-foreground">{item.detail}{item.subdetail ? ` · ${item.subdetail}` : ''}</p></div></button><div className="shrink-0 text-right"><p className="font-semibold">{priceLabel}</p><div className="mt-1 flex justify-end gap-2">{item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-[#2d6a58] hover:underline">Book <ExternalLink size={11} /></a>}{onRemove && <button onClick={onRemove} aria-label={`Remove ${item.name}`} className="text-muted-foreground hover:text-foreground"><Trash2 size={13} /></button>}</div></div><span className={`grid size-5 shrink-0 place-items-center rounded-full ${selected ? 'bg-[#2d6a58] text-white' : 'border text-transparent'}`}><Check size={13} /></span></div>;
+function AddEntryDialog({ kind, editing, draft, setDraft, onClose, onAdd }: { kind: AddKind | null; editing: boolean; draft: Draft; setDraft: (value: Draft) => void; onClose: () => void; onAdd: () => void }) {
+  const set = (key: keyof Draft, value: string) => setDraft({ ...draft, [key]: value });
+  return <Dialog open={Boolean(kind)} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl sm:max-w-lg"><DialogHeader><DialogTitle>{editing ? 'Edit' : 'Add'} {kind}</DialogTitle><DialogDescription>{editing ? 'Complete or correct the imported details.' : 'Add it visually now.'} The YAML source updates automatically.</DialogDescription></DialogHeader><div className="grid gap-4 py-2"><Field label={kind === 'flight' ? 'Airline' : 'Name'} value={draft.name} setValue={(value) => set('name', value)} placeholder={kind === 'activity' ? 'Edinburgh Castle' : 'Name'} /><Field label="Details" value={draft.detail} setValue={(value) => set('detail', value)} placeholder="Room type, notes or timing" />{kind !== 'flight' && <Field label="Address" value={draft.address} setValue={(value) => set('address', value)} placeholder="Address or neighbourhood" />}<div className="grid grid-cols-2 gap-3">{kind !== 'flight' && <><Field label="Latitude" value={draft.lat} setValue={(value) => set('lat', value)} placeholder="55.9533" /><Field label="Longitude" value={draft.lng} setValue={(value) => set('lng', value)} placeholder="-3.1883" /></>}<Field label={kind === 'flight' ? 'Price per person' : 'Total price'} value={draft.price} setValue={(value) => set('price', value)} placeholder="0" type="number" /></div><Field label="Link" value={draft.url} setValue={(value) => set('url', value)} placeholder="https://…" type="url" />{kind !== 'flight' && <Field label="Image URL" value={draft.image} setValue={(value) => set('image', value)} placeholder="https://…" type="url" />}</div><DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button onClick={onAdd} className="bg-black text-white">{editing ? 'Save changes' : 'Add to trip'}</Button></DialogFooter></DialogContent></Dialog>;
 }
+function Field({ label, value, setValue, placeholder, type = 'text' }: { label: string; value: string; setValue: (value: string) => void; placeholder: string; type?: string }) { return <label className="text-sm font-medium">{label}<Input value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} type={type} className="mt-1.5 h-10" /></label>; }
 
-function StayCard({ item, selected, travellers, onSelect, onRemove }: { item: Option; selected: boolean; travellers: number; onSelect: () => void; onRemove?: () => void }) {
-  return <div className={`group relative overflow-hidden rounded-2xl border bg-white transition-all ${selected ? 'border-[#2d6a58] ring-1 ring-[#2d6a58] shadow-[0_8px_24px_rgba(27,63,52,0.08)]' : 'hover:-translate-y-0.5 hover:border-[#9bb9ad]'}`}><button onClick={onSelect} className="w-full text-left">{item.image ? <div className="relative h-36 overflow-hidden bg-muted"><img src={item.image} alt={`${item.name} visual preview`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.025]" /><span className="absolute bottom-2 left-2 rounded-full bg-black/45 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">Visual preview</span></div> : <div className="grid h-24 place-items-center bg-[#f4efe4] text-[#8d5b24]"><BedDouble size={24} /></div>}<div className="p-5"><div className="flex items-start justify-between gap-3"><div>{item.rating && <span className="rounded-lg bg-[#f2f0ea] px-2 py-1 text-xs font-semibold">{item.rating}</span>}</div><span className={`grid size-5 place-items-center rounded-full ${selected ? 'bg-[#2d6a58] text-white' : 'border text-transparent'}`}><Check size={13} /></span></div><h3 className="mt-3 font-semibold">{item.name}</h3><p className="mt-1 text-sm text-muted-foreground">{item.detail}</p><p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin size={12} /> {item.subdetail ?? 'Location not added'}</p><div className="mt-4 flex items-end justify-between border-t pt-4"><span className="text-xs text-muted-foreground">Total stay</span><span><strong className="text-lg">{euro(item.price)}</strong><small className="ml-1 text-muted-foreground">· {euro(item.price / travellers)} pp</small></span></div></div></button><div className="flex justify-end gap-3 px-5 pb-4">{item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#2d6a58] hover:underline">View stay <ChevronRight size={12} /></a>}{item.mapsUrl && <a href={item.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#2d6a58] hover:underline">Apple Maps <Navigation size={11} /></a>}{onRemove && <button onClick={onRemove} className="text-xs text-muted-foreground hover:text-foreground">Remove</button>}</div></div>;
+function FinalVersion({ trip, total, perPerson, flight, stay, activities, onClose }: { trip: TripDocument; total: number; perPerson: number; flight?: Flight; stay?: Stay; activities: Activity[]; onClose: () => void }) {
+  return <div className="final-overlay fixed inset-0 z-[90] overflow-y-auto bg-[#eceae6] print:static print:overflow-visible print:bg-white"><div className="no-print fixed right-5 top-5 z-10 flex gap-2"><Button onClick={onClose} variant="outline" className="bg-white"><X /> Close</Button><Button onClick={() => window.print()} className="bg-black text-white"><Download /> Save as PDF</Button></div><article className="print-sheet mx-auto my-10 w-[min(900px,calc(100%-32px))] overflow-hidden bg-white shadow-xl print:my-0 print:w-full print:shadow-none"><header className="bg-black p-10 text-white"><div className="flex items-start justify-between gap-8"><div><p className="text-xs uppercase tracking-[0.16em] text-white/50">Final itinerary</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{trip.trip.title}</h1><p className="mt-4 text-white/55">{shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)} · {trip.trip.travellers} travellers</p></div><div className="text-right"><p className="text-3xl font-semibold">{money(perPerson, trip.trip.currency)}</p><p className="mt-1 text-xs text-white/45">per person</p></div></div></header><div className="grid gap-8 p-10 md:grid-cols-[1fr_1fr]"><div className="space-y-7"><FinalBlock icon={<Plane />} title="Flights"><p className="font-medium">{flight?.airline ?? 'Not selected'}</p>{flight && <><p>{flight.outbound.from} {time(flight.outbound.depart)} → {flight.outbound.to} {time(flight.outbound.arrive)}</p><p>{flight.return.from} {time(flight.return.depart)} → {flight.return.to} {time(flight.return.arrive)}</p></>}</FinalBlock><FinalBlock icon={<BedDouble />} title="Stay">{stay ? <><p className="font-medium">{stay.name}</p><p>{stay.type}</p><p>{stay.address}</p></> : <p>Not selected</p>}</FinalBlock><FinalBlock icon={<Sparkles />} title="Activities">{activities.length ? activities.map((item) => <p key={item.id}><strong>{item.name}</strong>{item.address ? ` · ${item.address}` : ''}</p>) : <p>No activities added</p>}</FinalBlock><div className="border-t pt-5"><div className="flex justify-between text-sm"><span>Total trip</span><strong>{money(total, trip.trip.currency)}</strong></div><div className="mt-2 flex justify-between text-sm"><span>Per person</span><strong>{money(perPerson, trip.trip.currency)}</strong></div></div></div><div className="min-h-[440px] overflow-hidden rounded-xl border"><TripMap trip={trip} compact /></div></div><footer className="border-t px-10 py-5 text-xs text-black/40">Generated with Roamwise · Verify live prices and booking details before purchase.</footer></article></div>;
 }
-
-function MapPanel({ stay }: { stay: Option }) {
-  const mapSrc = stay.lat && stay.lng ? `https://www.openstreetmap.org/export/embed.html?bbox=-3.235%2C55.925%2C-3.145%2C55.985&layer=mapnik&marker=${stay.lat}%2C${stay.lng}` : null;
-  return <div className="mt-4 overflow-hidden rounded-2xl border bg-white"><div className="flex items-center justify-between gap-4 border-b px-4 py-3"><div className="flex items-center gap-2"><MapIcon size={17} className="text-[#2d6a58]" /><div><p className="text-sm font-semibold">{stay.name} on the map</p><p className="text-xs text-muted-foreground">Approximate area · confirm on the listing</p></div></div>{stay.mapsUrl && <Button nativeButton={false} render={<a href={stay.mapsUrl} target="_blank" rel="noreferrer" />} variant="outline" size="sm" className="rounded-xl"><Navigation /> Open in Apple Maps</Button>}</div>{mapSrc ? <iframe key={mapSrc} src={mapSrc} title={`Map around ${stay.name}`} loading="lazy" className="h-64 w-full border-0 grayscale-[15%]" /> : <div className="grid h-40 place-items-center text-sm text-muted-foreground">Add a location to see it here.</div>}</div>;
-}
-
-function PriceRow({ label, value, muted }: { label: string; value: number; muted?: boolean }) { return <div className={`flex justify-between ${muted ? 'text-white/35' : ''}`}><span className={muted ? '' : 'text-white/60'}>{label}</span><span>{euro(value)}</span></div>; }
-function SummaryLine({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-5 text-sm"><span className="text-muted-foreground">{label}</span><span className="text-right font-medium">{value}</span></div>; }
+function FinalBlock({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) { return <section><h2 className="mb-3 flex items-center gap-2 text-sm font-semibold [&_svg]:size-4">{icon}{title}</h2><div className="space-y-1.5 text-sm text-black/55">{children}</div></section>; }
