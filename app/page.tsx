@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowRight, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Code2, Download, ExternalLink, FileText,
-  Images, Link2, LoaderCircle, MapPin, Pencil, Plane, Plus, Sparkles, Star, Trash2, Upload, Users, X,
+  ArrowRight, Bath, BedDouble, BookOpen, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Code2, Download, ExternalLink, Expand, FileText,
+  Images, Link2, LoaderCircle, MapPin, Pencil, Plane, Plus, Sparkles, Star, Trash2, Upload, Users, X, XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,9 @@ import { TripMap } from '@/components/trip-map';
 import { DEFAULT_TRIP, parseTrip, stringifyTrip, type Activity, type FlightLeg, type Stay, type TripDocument } from '@/lib/trip-schema';
 
 type AddKind = 'flight' | 'stay' | 'activity';
-type Draft = { name: string; detail: string; address: string; price: string; image: string; url: string; lat: string; lng: string; from: string; to: string; depart: string; arrive: string; date: string; time: string };
+type Draft = { name: string; detail: string; address: string; price: string; image: string; url: string; lat: string; lng: string; from: string; to: string; depart: string; arrive: string; date: string; time: string; notes: string; neighbourhood: string; amenities: string; pros: string; cons: string; checkIn: string; checkOut: string; cancellationPolicy: string; bedrooms: string; bathrooms: string; size: string };
 type DeleteTarget = { kind: AddKind; id: string; name: string; direction?: 'outbound' | 'return' };
-const emptyDraft: Draft = { name: '', detail: '', address: '', price: '', image: '', url: '', lat: '', lng: '', from: '', to: '', depart: '', arrive: '', date: '', time: '' };
+const emptyDraft: Draft = { name: '', detail: '', address: '', price: '', image: '', url: '', lat: '', lng: '', from: '', to: '', depart: '', arrive: '', date: '', time: '', notes: '', neighbourhood: '', amenities: '', pros: '', cons: '', checkIn: '', checkOut: '', cancellationPolicy: '', bedrooms: '', bathrooms: '', size: '' };
 
 function money(value: number, currency = 'EUR') {
   return new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: value % 1 ? 2 : 0 }).format(value || 0);
@@ -25,6 +25,7 @@ function money(value: number, currency = 'EUR') {
 function shortDate(value: string) { return new Date(`${value}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
 function time(value?: string) { return value?.split('T')[1]?.slice(0, 5) ?? '—'; }
 function safeId(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `item-${Date.now()}`; }
+function splitList(value: string) { return value.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean); }
 
 export default function Home() {
   const [trip, setTrip] = useState<TripDocument>(DEFAULT_TRIP);
@@ -40,6 +41,7 @@ export default function Home() {
   const [flightState, setFlightState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [viewingStayId, setViewingStayId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [finalOpen, setFinalOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -62,6 +64,7 @@ export default function Home() {
   const selectedOutbound = trip.flights.outbound.find((item) => item.id === trip.selected.outbound_flight);
   const selectedReturn = trip.flights.return.find((item) => item.id === trip.selected.return_flight);
   const selectedStay = trip.stays.find((item) => item.id === trip.selected.stay);
+  const viewingStay = trip.stays.find((item) => item.id === viewingStayId);
   const selectedActivities = trip.activities.filter((item) => trip.selected.activities.includes(item.id));
   const total = ((selectedOutbound?.price_per_person ?? 0) + (selectedReturn?.price_per_person ?? 0)) * trip.trip.travellers + (selectedStay?.price_total ?? 0) + selectedActivities.reduce((sum, item) => sum + item.price_total, 0);
   const perPerson = total / Math.max(1, trip.trip.travellers);
@@ -107,6 +110,12 @@ export default function Home() {
       price_total: Number(data.price) || 0,
       image: data.image ? String(data.image) : undefined,
       images: Array.isArray(data.images) ? data.images.map(String) : undefined,
+      amenities: Array.isArray(data.amenities) ? data.amenities.map(String) : undefined,
+      check_in: data.check_in ? String(data.check_in) : undefined,
+      check_out: data.check_out ? String(data.check_out) : undefined,
+      bedrooms: Number(data.bedrooms) || undefined,
+      bathrooms: Number(data.bathrooms) || undefined,
+      size_m2: Number(data.size_m2) || undefined,
       url: link.trim(),
     };
     commit({ ...trip, stays: [...trip.stays, stay], selected: { ...trip.selected, stay: stay.id } });
@@ -123,7 +132,7 @@ export default function Home() {
     const coordinates = Number.isFinite(Number(draft.lat)) && Number.isFinite(Number(draft.lng)) && draft.lat && draft.lng ? { lat: Number(draft.lat), lng: Number(draft.lng) } : undefined;
     const id = `${safeId(draft.name)}-${Date.now()}`;
     if (addKind === 'stay') {
-      const item: Stay = { id, name: draft.name, type: draft.detail, address: draft.address, price_total: Number(draft.price) || 0, image: draft.image || undefined, url: draft.url || undefined, coordinates };
+      const item: Stay = { id, name: draft.name, type: draft.detail, address: draft.address, price_total: Number(draft.price) || 0, image: draft.image || undefined, url: draft.url || undefined, coordinates, notes: draft.notes || undefined, neighbourhood: draft.neighbourhood || undefined, amenities: splitList(draft.amenities), pros: splitList(draft.pros), cons: splitList(draft.cons), check_in: draft.checkIn || undefined, check_out: draft.checkOut || undefined, cancellation_policy: draft.cancellationPolicy || undefined, bedrooms: Number(draft.bedrooms) || undefined, bathrooms: Number(draft.bathrooms) || undefined, size_m2: Number(draft.size) || undefined };
       if (editingId) commit({ ...trip, stays: trip.stays.map((existing) => existing.id === editingId ? { ...existing, ...item, id: editingId } : existing), selected: { ...trip.selected, stay: editingId } });
       else commit({ ...trip, stays: [...trip.stays, item], selected: { ...trip.selected, stay: id } });
     } else if (addKind === 'activity') {
@@ -146,7 +155,7 @@ export default function Home() {
   }
 
   function editStay(item: Stay) {
-    setEditingId(item.id); setDraft({ ...emptyDraft, name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '' }); setAddKind('stay');
+    setViewingStayId(null); setEditingId(item.id); setDraft({ ...emptyDraft, name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '', notes: item.notes ?? '', neighbourhood: item.neighbourhood ?? '', amenities: item.amenities?.join('\n') ?? '', pros: item.pros?.join('\n') ?? '', cons: item.cons?.join('\n') ?? '', checkIn: item.check_in ?? '', checkOut: item.check_out ?? '', cancellationPolicy: item.cancellation_policy ?? '', bedrooms: item.bedrooms ? String(item.bedrooms) : '', bathrooms: item.bathrooms ? String(item.bathrooms) : '', size: item.size_m2 ? String(item.size_m2) : '' }); setAddKind('stay');
   }
 
   function editActivity(item: Activity) {
@@ -162,6 +171,7 @@ export default function Home() {
     if (deleteTarget.kind === 'stay') {
       const stays = trip.stays.filter((item) => item.id !== deleteTarget.id);
       commit({ ...trip, stays, selected: { ...trip.selected, stay: trip.selected.stay === deleteTarget.id ? stays[0]?.id : trip.selected.stay } });
+      if (viewingStayId === deleteTarget.id) setViewingStayId(null);
     } else if (deleteTarget.kind === 'activity') {
       commit({ ...trip, activities: trip.activities.filter((item) => item.id !== deleteTarget.id), selected: { ...trip.selected, activities: trip.selected.activities.filter((id) => id !== deleteTarget.id) } });
     } else {
@@ -193,7 +203,7 @@ export default function Home() {
         if (!response.ok) return stay;
         const data = await response.json() as Record<string, unknown>;
         const coordinate = data.coordinates as { lat?: number; lng?: number } | undefined;
-        return { ...stay, name: data.title ? String(data.title) : stay.name, type: data.description ? String(data.description) : stay.type, address: data.address ? String(data.address) : stay.address, image: data.image ? String(data.image) : stay.image, images: Array.isArray(data.images) && data.images.length ? data.images.map(String) : stay.images, coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : stay.coordinates, price_total: Number(data.price) || stay.price_total };
+        return { ...stay, name: data.title ? String(data.title) : stay.name, type: data.description ? String(data.description) : stay.type, address: data.address ? String(data.address) : stay.address, image: data.image ? String(data.image) : stay.image, images: Array.isArray(data.images) && data.images.length ? data.images.map(String) : stay.images, amenities: Array.isArray(data.amenities) && data.amenities.length ? data.amenities.map(String) : stay.amenities, check_in: data.check_in ? String(data.check_in) : stay.check_in, check_out: data.check_out ? String(data.check_out) : stay.check_out, bedrooms: Number(data.bedrooms) || stay.bedrooms, bathrooms: Number(data.bathrooms) || stay.bathrooms, size_m2: Number(data.size_m2) || stay.size_m2, coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : stay.coordinates, price_total: Number(data.price) || stay.price_total };
       } catch { return stay; }
     }));
     const next = { ...base, stays: refreshed };
@@ -239,11 +249,11 @@ export default function Home() {
               selected={trip.selected.stay === item.id}
               placeholder={<BedDouble />}
               details={[
-                { icon: <BedDouble />, label: item.type ?? 'Stay' },
+                { icon: <BedDouble />, label: item.neighbourhood ?? item.type ?? 'Stay' },
                 { icon: <Star />, label: item.rating ? `${item.rating} rating` : 'Not rated' },
               ]}
               onSelect={() => commit({ ...trip, selected: { ...trip.selected, stay: item.id } })}
-              actions={<><EntryAction label="Edit" onClick={() => editStay(item)} icon={<Pencil />} /><EntryAction label="Delete" onClick={() => setDeleteTarget({ kind: 'stay', id: item.id, name: item.name })} icon={<Trash2 />} destructive />{item.url && <External item={item.url} label="Stay listing" />}</>}
+              actions={<><EntryAction label="Details" onClick={() => setViewingStayId(item.id)} icon={<BookOpen />} /><EntryAction label="Edit" onClick={() => editStay(item)} icon={<Pencil />} /><EntryAction label="Delete" onClick={() => setDeleteTarget({ kind: 'stay', id: item.id, name: item.name })} icon={<Trash2 />} destructive />{item.url && <External item={item.url} label="Stay listing" />}</>}
             />)}</div>
           </Section>
 
@@ -276,6 +286,7 @@ export default function Home() {
     </div>
 
     <AddEntryDialog kind={addKind} editing={Boolean(editingId)} draft={draft} setDraft={setDraft} onClose={() => { setAddKind(null); setEditingId(null); }} onAdd={addEntry} />
+    <StayDetailsDialog stay={viewingStay} currency={trip.trip.currency} onClose={() => setViewingStayId(null)} onEdit={editStay} />
     <DeleteEntryDialog target={deleteTarget} onCancel={() => setDeleteTarget(null)} onConfirm={deleteEntry} />
     {finalOpen && <FinalVersion trip={trip} total={total} perPerson={perPerson} outbound={selectedOutbound} returnFlight={selectedReturn} stay={selectedStay} activities={selectedActivities} onClose={() => setFinalOpen(false)} />}
   </main>;
@@ -345,10 +356,11 @@ function AddEntryDialog({ kind, editing, draft, setDraft, onClose, onAdd }: { ki
       <div className="grid grid-cols-2 gap-3"><Field label="From" value={draft.from} setValue={(value) => set('from', value.toUpperCase())} placeholder="MAD" /><Field label="To" value={draft.to} setValue={(value) => set('to', value.toUpperCase())} placeholder="EDI" /></div>
       <div className="grid grid-cols-2 gap-3"><Field label="Departure" value={draft.depart} setValue={(value) => set('depart', value)} placeholder="" type="datetime-local" /><Field label="Arrival" value={draft.arrive} setValue={(value) => set('arrive', value)} placeholder="" type="datetime-local" /></div>
     </> : <>
-      {kind === 'stay' && <Field label="Type / details" value={draft.detail} setValue={(value) => set('detail', value)} placeholder="Entire apartment · 1 bedroom" />}
+      {kind === 'stay' && <><Field label="Type / short summary" value={draft.detail} setValue={(value) => set('detail', value)} placeholder="Entire apartment · 1 bedroom" /><Field label="Neighbourhood" value={draft.neighbourhood} setValue={(value) => set('neighbourhood', value)} placeholder="Old Town" /><div className="grid grid-cols-3 gap-3"><Field label="Bedrooms" value={draft.bedrooms} setValue={(value) => set('bedrooms', value)} placeholder="1" type="number" /><Field label="Bathrooms" value={draft.bathrooms} setValue={(value) => set('bathrooms', value)} placeholder="1" type="number" /><Field label="Size (m²)" value={draft.size} setValue={(value) => set('size', value)} placeholder="47" type="number" /></div></>}
       {kind === 'activity' && <div className="grid grid-cols-2 gap-3"><Field label="Date" value={draft.date} setValue={(value) => set('date', value)} placeholder="" type="date" /><Field label="Time" value={draft.time} setValue={(value) => set('time', value)} placeholder="" type="time" /></div>}
       <Field label="Address" value={draft.address} setValue={(value) => set('address', value)} placeholder="Address or neighbourhood" />
       <div className="grid grid-cols-2 gap-3"><Field label="Latitude" value={draft.lat} setValue={(value) => set('lat', value)} placeholder="55.9533" /><Field label="Longitude" value={draft.lng} setValue={(value) => set('lng', value)} placeholder="-3.1883" /></div>
+      {kind === 'stay' && <><div className="grid grid-cols-2 gap-3"><Field label="Check-in" value={draft.checkIn} setValue={(value) => set('checkIn', value)} placeholder="15:00" /><Field label="Check-out" value={draft.checkOut} setValue={(value) => set('checkOut', value)} placeholder="11:00" /></div><TextAreaField label="Amenities" value={draft.amenities} setValue={(value) => set('amenities', value)} placeholder="Wi-Fi\nKitchen\nWasher" hint="One per line or comma-separated" /><div className="grid grid-cols-2 gap-3"><TextAreaField label="Pros" value={draft.pros} setValue={(value) => set('pros', value)} placeholder="Walkable\nQuiet street" /><TextAreaField label="Cons" value={draft.cons} setValue={(value) => set('cons', value)} placeholder="No lift\nSmall kitchen" /></div><TextAreaField label="Cancellation policy" value={draft.cancellationPolicy} setValue={(value) => set('cancellationPolicy', value)} placeholder="Free cancellation until…" /><TextAreaField label="Extensive notes" value={draft.notes} setValue={(value) => set('notes', value)} placeholder="Add research, impressions, transport notes, questions for the host, or anything useful for the decision…" rows={7} /></>}
     </>}
     <Field label={kind === 'flight' ? 'Price per person' : 'Total price'} value={draft.price} setValue={(value) => set('price', value)} placeholder="0" type="number" />
     <Field label="Link" value={draft.url} setValue={(value) => set('url', value)} placeholder="https://…" type="url" />
@@ -356,12 +368,35 @@ function AddEntryDialog({ kind, editing, draft, setDraft, onClose, onAdd }: { ki
   </div><DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button onClick={onAdd} className="bg-black text-white">{editing ? 'Save changes' : 'Add to trip'}</Button></DialogFooter></DialogContent></Dialog>;
 }
 function Field({ label, value, setValue, placeholder, type = 'text' }: { label: string; value: string; setValue: (value: string) => void; placeholder: string; type?: string }) { return <label className="text-sm font-medium">{label}<Input value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} type={type} className="mt-1.5 h-10" /></label>; }
+function TextAreaField({ label, value, setValue, placeholder, hint, rows = 3 }: { label: string; value: string; setValue: (value: string) => void; placeholder: string; hint?: string; rows?: number }) { return <label className="text-sm font-medium">{label}<Textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} rows={rows} className="mt-1.5 resize-y" />{hint && <span className="mt-1 block text-[11px] font-normal text-black/40">{hint}</span>}</label>; }
+
+function StayDetailsDialog({ stay, currency, onClose, onEdit }: { stay?: Stay; currency: string; onClose: () => void; onEdit: (stay: Stay) => void }) {
+  const facts = stay ? [
+    stay.bedrooms ? { icon: <BedDouble />, label: `${stay.bedrooms} bedroom${stay.bedrooms === 1 ? '' : 's'}` } : null,
+    stay.bathrooms ? { icon: <Bath />, label: `${stay.bathrooms} bathroom${stay.bathrooms === 1 ? '' : 's'}` } : null,
+    stay.size_m2 ? { icon: <Expand />, label: `${stay.size_m2} m²` } : null,
+  ].filter(Boolean) as { icon: React.ReactNode; label: string }[] : [];
+  return <Dialog open={Boolean(stay)} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl p-0 sm:max-w-3xl">
+    {stay && <><div className="relative h-56 overflow-hidden rounded-t-2xl bg-[#ededeb] sm:h-72">{stay.image ? <img src={stay.image} alt={stay.name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-black/20"><BedDouble size={34} /></div>}<div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/65 to-transparent" /><div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-4 text-white"><div><p className="text-sm text-white/70">{stay.neighbourhood ?? stay.type ?? 'Accommodation'}</p><h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em]">{stay.name}</h2></div><strong className="rounded-full bg-white px-4 py-2 text-sm text-black">{money(stay.price_total, currency)}</strong></div></div>
+      <div className="space-y-7 p-6 sm:p-8">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-black/55"><span className="flex items-center gap-1.5"><MapPin size={14} />{stay.address ?? 'Location not added'}</span>{stay.rating && <Badge variant="secondary" className="rounded-full"><Star /> {stay.rating}</Badge>}</div>
+        {facts.length > 0 && <div className="grid gap-2 sm:grid-cols-3">{facts.map((fact) => <div key={fact.label} className="flex items-center gap-2 rounded-xl bg-[#f5f5f3] px-4 py-3 text-sm [&_svg]:size-4">{fact.icon}{fact.label}</div>)}</div>}
+        <DetailSection title="Notes"><p className="whitespace-pre-wrap text-sm leading-6 text-black/65">{stay.notes || 'No detailed notes yet. Use Edit to add research, impressions, transport information, or questions for the host.'}</p></DetailSection>
+        {stay.amenities && stay.amenities.length > 0 && <DetailSection title="Amenities"><div className="flex flex-wrap gap-2">{stay.amenities.map((item) => <span key={item} className="rounded-full bg-[#f2f2f0] px-3 py-1.5 text-xs text-black/65">{item}</span>)}</div></DetailSection>}
+        {((stay.pros?.length ?? 0) > 0 || (stay.cons?.length ?? 0) > 0) && <div className="grid gap-5 sm:grid-cols-2"><DetailList title="Pros" items={stay.pros ?? []} icon={<CheckCircle2 className="text-green-700" />} /><DetailList title="Cons" items={stay.cons ?? []} icon={<XCircle className="text-red-600" />} /></div>}
+        <div className="grid gap-5 sm:grid-cols-2"><DetailSection title="Arrival"><div className="space-y-2 text-sm text-black/60"><p><span className="text-black/35">Check-in</span><br />{stay.check_in || 'Not added'}</p><p><span className="text-black/35">Check-out</span><br />{stay.check_out || 'Not added'}</p></div></DetailSection><DetailSection title="Cancellation"><p className="whitespace-pre-wrap text-sm leading-6 text-black/60">{stay.cancellation_policy || 'Policy not added'}</p></DetailSection></div>
+      </div>
+      <DialogFooter className="border-t px-6 py-4 sm:px-8"><Button variant="outline" onClick={onClose}>Close</Button>{stay.url && <Button variant="outline" render={<a href={stay.url} target="_blank" rel="noreferrer" />}><ExternalLink /> Listing</Button>}<Button onClick={() => onEdit(stay)} className="bg-black text-white"><Pencil /> Edit all details</Button></DialogFooter></>}
+  </DialogContent></Dialog>;
+}
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) { return <section><h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-black/35">{title}</h3>{children}</section>; }
+function DetailList({ title, items, icon }: { title: string; items: string[]; icon: React.ReactNode }) { return <DetailSection title={title}>{items.length ? <ul className="space-y-2">{items.map((item) => <li key={item} className="flex items-start gap-2 text-sm text-black/65 [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0">{icon}<span>{item}</span></li>)}</ul> : <p className="text-sm text-black/40">Nothing added yet.</p>}</DetailSection>; }
 
 function DeleteEntryDialog({ target, onCancel, onConfirm }: { target: DeleteTarget | null; onCancel: () => void; onConfirm: () => void }) {
   return <Dialog open={Boolean(target)} onOpenChange={(open) => !open && onCancel()}><DialogContent className="rounded-xl sm:max-w-sm"><DialogHeader><DialogTitle>Delete {target?.name}?</DialogTitle><DialogDescription>This removes the {target?.kind} from the trip and recalculates the selected total. You can still restore it from a saved YAML file.</DialogDescription></DialogHeader><DialogFooter><Button onClick={onCancel} variant="outline">Cancel</Button><Button onClick={onConfirm} variant="destructive"><Trash2 /> Delete</Button></DialogFooter></DialogContent></Dialog>;
 }
 
 function FinalVersion({ trip, total, perPerson, outbound, returnFlight, stay, activities, onClose }: { trip: TripDocument; total: number; perPerson: number; outbound?: FlightLeg; returnFlight?: FlightLeg; stay?: Stay; activities: Activity[]; onClose: () => void }) {
-  return <div className="final-overlay fixed inset-0 z-[90] overflow-y-auto bg-[#eceae6] print:static print:overflow-visible print:bg-white"><div className="no-print fixed right-5 top-5 z-10 flex gap-2"><Button onClick={onClose} variant="outline" className="bg-white"><X /> Close</Button><Button onClick={() => window.print()} className="bg-black text-white"><Download /> Save as PDF</Button></div><article className="print-sheet mx-auto my-10 w-[min(900px,calc(100%-32px))] overflow-hidden bg-white shadow-xl print:my-0 print:w-full print:shadow-none"><header className="bg-black p-10 text-white"><div className="flex items-start justify-between gap-8"><div><p className="text-xs uppercase tracking-[0.16em] text-white/50">Final itinerary</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{trip.trip.title}</h1><p className="mt-4 text-white/55">{shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)} · {trip.trip.travellers} travellers</p></div><div className="text-right"><p className="text-3xl font-semibold">{money(perPerson, trip.trip.currency)}</p><p className="mt-1 text-xs text-white/45">per person</p></div></div></header><div className="grid gap-8 p-10 md:grid-cols-[1fr_1fr]"><div className="space-y-7"><FinalBlock icon={<Plane />} title="Flights">{outbound ? <p><strong>{outbound.flight_number ?? outbound.airline}</strong> · {outbound.from} {time(outbound.depart)} → {outbound.to} {time(outbound.arrive)} · {money(outbound.price_per_person, trip.trip.currency)}</p> : <p>Outbound not selected</p>}{returnFlight ? <p><strong>{returnFlight.flight_number ?? returnFlight.airline}</strong> · {returnFlight.from} {time(returnFlight.depart)} → {returnFlight.to} {time(returnFlight.arrive)} · {money(returnFlight.price_per_person, trip.trip.currency)}</p> : <p>Return not selected</p>}</FinalBlock><FinalBlock icon={<BedDouble />} title="Stay">{stay ? <><p className="font-medium">{stay.name}</p><p>{stay.type}</p><p>{stay.address}</p></> : <p>Not selected</p>}</FinalBlock><FinalBlock icon={<Sparkles />} title="Activities">{activities.length ? activities.map((item) => <p key={item.id}><strong>{item.name}</strong>{item.address ? ` · ${item.address}` : ''}</p>) : <p>No activities added</p>}</FinalBlock><div className="border-t pt-5"><div className="flex justify-between text-sm"><span>Total trip</span><strong>{money(total, trip.trip.currency)}</strong></div><div className="mt-2 flex justify-between text-sm"><span>Per person</span><strong>{money(perPerson, trip.trip.currency)}</strong></div></div></div><div className="min-h-[440px] overflow-hidden rounded-xl border"><TripMap trip={trip} compact /></div></div><footer className="border-t px-10 py-5 text-xs text-black/40">Generated with Roamwise · Verify live prices and booking details before purchase.</footer></article></div>;
+  return <div className="final-overlay fixed inset-0 z-[90] overflow-y-auto bg-[#eceae6] print:static print:overflow-visible print:bg-white"><div className="no-print fixed right-5 top-5 z-10 flex gap-2"><Button onClick={onClose} variant="outline" className="bg-white"><X /> Close</Button><Button onClick={() => window.print()} className="bg-black text-white"><Download /> Save as PDF</Button></div><article className="print-sheet mx-auto my-10 w-[min(900px,calc(100%-32px))] overflow-hidden bg-white shadow-xl print:my-0 print:w-full print:shadow-none"><header className="bg-black p-10 text-white"><div className="flex items-start justify-between gap-8"><div><p className="text-xs uppercase tracking-[0.16em] text-white/50">Final itinerary</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{trip.trip.title}</h1><p className="mt-4 text-white/55">{shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)} · {trip.trip.travellers} travellers</p></div><div className="text-right"><p className="text-3xl font-semibold">{money(perPerson, trip.trip.currency)}</p><p className="mt-1 text-xs text-white/45">per person</p></div></div></header><div className="grid gap-8 p-10 md:grid-cols-[1fr_1fr]"><div className="space-y-7"><FinalBlock icon={<Plane />} title="Flights">{outbound ? <p><strong>{outbound.flight_number ?? outbound.airline}</strong> · {outbound.from} {time(outbound.depart)} → {outbound.to} {time(outbound.arrive)} · {money(outbound.price_per_person, trip.trip.currency)}</p> : <p>Outbound not selected</p>}{returnFlight ? <p><strong>{returnFlight.flight_number ?? returnFlight.airline}</strong> · {returnFlight.from} {time(returnFlight.depart)} → {returnFlight.to} {time(returnFlight.arrive)} · {money(returnFlight.price_per_person, trip.trip.currency)}</p> : <p>Return not selected</p>}</FinalBlock><FinalBlock icon={<BedDouble />} title="Stay">{stay ? <><p className="font-medium">{stay.name}</p><p>{stay.type}</p><p>{stay.address}</p>{(stay.check_in || stay.check_out) && <p>Check-in {stay.check_in || '—'} · check-out {stay.check_out || '—'}</p>}{stay.amenities?.length ? <p>Amenities: {stay.amenities.join(', ')}</p> : null}{stay.notes && <p className="mt-2 whitespace-pre-wrap border-l-2 pl-3">{stay.notes}</p>}</> : <p>Not selected</p>}</FinalBlock><FinalBlock icon={<Sparkles />} title="Activities">{activities.length ? activities.map((item) => <p key={item.id}><strong>{item.name}</strong>{item.address ? ` · ${item.address}` : ''}</p>) : <p>No activities added</p>}</FinalBlock><div className="border-t pt-5"><div className="flex justify-between text-sm"><span>Total trip</span><strong>{money(total, trip.trip.currency)}</strong></div><div className="mt-2 flex justify-between text-sm"><span>Per person</span><strong>{money(perPerson, trip.trip.currency)}</strong></div></div></div><div className="min-h-[440px] overflow-hidden rounded-xl border"><TripMap trip={trip} compact /></div></div><footer className="border-t px-10 py-5 text-xs text-black/40">Generated with Roamwise · Verify live prices and booking details before purchase.</footer></article></div>;
 }
 function FinalBlock({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) { return <section><h2 className="mb-3 flex items-center gap-2 text-sm font-semibold [&_svg]:size-4">{icon}{title}</h2><div className="space-y-1.5 text-sm text-black/55">{children}</div></section>; }

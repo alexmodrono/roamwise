@@ -16,6 +16,9 @@ export type FlightLeg = {
 export type Stay = {
   id: string; name: string; type?: string; address?: string; coordinates?: Coordinates;
   price_total: number; rating?: string; url?: string; image?: string; images?: string[];
+  notes?: string; neighbourhood?: string; amenities?: string[]; pros?: string[]; cons?: string[];
+  check_in?: string; check_out?: string; cancellation_policy?: string;
+  bedrooms?: number; bathrooms?: number; size_m2?: number;
 };
 export type Activity = {
   id: string; name: string; date?: string; time?: string; address?: string;

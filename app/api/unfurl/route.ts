@@ -110,12 +110,24 @@ export async function POST(request: Request) {
       ? { lat: Number(geo.latitude), lng: Number(geo.longitude) } : undefined;
     const price = Number(offer?.price ?? offer?.lowPrice ?? meta(html, 'product:price:amount'));
     const priceCurrency = String(offer?.priceCurrency ?? meta(html, 'product:price:currency') ?? currency ?? '').toUpperCase();
+    const amenityValues = Array.isArray(lodging?.amenityFeature) ? lodging.amenityFeature : [];
+    const amenities = amenityValues.map((item) => typeof item === 'string' ? item : item && typeof item === 'object' && (item as Record<string, unknown>).value !== false ? String((item as Record<string, unknown>).name ?? '') : '').filter(Boolean).slice(0, 30);
+    const floorSize = lodging?.floorSize && typeof lodging.floorSize === 'object' ? lodging.floorSize as Record<string, unknown> : undefined;
+    const size = Number(floorSize?.value);
+    const bedrooms = Number(lodging?.numberOfBedrooms);
+    const bathrooms = Number(lodging?.numberOfBathroomsTotal ?? lodging?.numberOfBathrooms);
 
     if (!lodging && !meta(html, 'og:title') && !meta(html, 'og:image')) throw new Error('Provider returned a bot-check page');
 
     return Response.json({
       title: decode(title), description: decode(description), address,
       image: images[0], images,
+      amenities,
+      check_in: lodging?.checkinTime ? String(lodging.checkinTime) : undefined,
+      check_out: lodging?.checkoutTime ? String(lodging.checkoutTime) : undefined,
+      bedrooms: Number.isFinite(bedrooms) && bedrooms > 0 ? bedrooms : undefined,
+      bathrooms: Number.isFinite(bathrooms) && bathrooms > 0 ? bathrooms : undefined,
+      size_m2: Number.isFinite(size) && size > 0 && /m|square metre/i.test(String(floorSize?.unitText ?? floorSize?.unitCode ?? '')) ? size : undefined,
       coordinates, price: Number.isFinite(price) && (!currency || !priceCurrency || priceCurrency === currency.toUpperCase()) ? price : undefined,
       price_currency: priceCurrency || undefined,
       url: url.toString(), provider: url.hostname.includes('airbnb') ? 'Airbnb' : 'Booking.com',
