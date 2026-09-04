@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowRight, BedDouble, CalendarDays, Check, Clock3, Code2, Download, ExternalLink, FileText,
-  Link2, LoaderCircle, MapPin, Plane, Plus, Sparkles, Star, Upload, Users, X,
+  ArrowRight, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Code2, Download, ExternalLink, FileText,
+  Images, Link2, LoaderCircle, MapPin, Plane, Plus, Sparkles, Star, Upload, Users, X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ export default function Home() {
   const [sourceError, setSourceError] = useState('');
   const [link, setLink] = useState('');
   const [linkState, setLinkState] = useState<'idle' | 'loading' | 'done' | 'fallback'>('idle');
+  const [linkMessage, setLinkMessage] = useState('');
   const [stayState, setStayState] = useState<'idle' | 'loading' | 'done'>('idle');
   const [addKind, setAddKind] = useState<AddKind | null>(null);
   const [flightDirection, setFlightDirection] = useState<'outbound' | 'return'>('outbound');
@@ -82,14 +83,17 @@ export default function Home() {
 
   async function importListing() {
     if (!link.trim()) return;
-    setLinkState('loading');
+    setLinkState('loading'); setLinkMessage('');
     let data: Record<string, unknown> = {};
     try {
-      const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: link.trim() }) });
+      const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: link.trim(), start: trip.trip.dates.start, end: trip.trip.dates.end, travellers: trip.trip.travellers, currency: trip.trip.currency }) });
       data = await response.json() as Record<string, unknown>;
       if (!response.ok) throw new Error(String(data.error ?? 'Import failed'));
       setLinkState('done');
-    } catch { setLinkState('fallback'); }
+      const photoCount = Array.isArray(data.images) ? data.images.length : data.image ? 1 : 0;
+      const loaded = [photoCount ? `${photoCount} photo${photoCount === 1 ? '' : 's'}` : '', Number(data.price) ? 'live price' : '', data.address ? 'location' : ''].filter(Boolean);
+      setLinkMessage(loaded.length ? `Loaded ${loaded.join(', ')}. Check the details before deciding.` : 'Listing added. Complete any details the provider did not expose.');
+    } catch { setLinkState('fallback'); setLinkMessage('The provider blocked its listing details, so the link was added as an editable entry.'); }
     const host = (() => { try { return new URL(link).hostname.replace('www.', ''); } catch { return 'Imported stay'; } })();
     const coordinate = data.coordinates as { lat?: number; lng?: number } | undefined;
     const stay: Stay = {
@@ -100,6 +104,7 @@ export default function Home() {
       coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : undefined,
       price_total: Number(data.price) || 0,
       image: data.image ? String(data.image) : undefined,
+      images: Array.isArray(data.images) ? data.images.map(String) : undefined,
       url: link.trim(),
     };
     commit({ ...trip, stays: [...trip.stays, stay], selected: { ...trip.selected, stay: stay.id } });
@@ -154,11 +159,11 @@ export default function Home() {
     const refreshed = await Promise.all(base.stays.map(async (stay) => {
       if (!stay.url) return stay;
       try {
-        const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: stay.url }) });
+        const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: stay.url, start: base.trip.dates.start, end: base.trip.dates.end, travellers: base.trip.travellers, currency: base.trip.currency }) });
         if (!response.ok) return stay;
         const data = await response.json() as Record<string, unknown>;
         const coordinate = data.coordinates as { lat?: number; lng?: number } | undefined;
-        return { ...stay, name: data.title ? String(data.title) : stay.name, type: data.description ? String(data.description) : stay.type, address: data.address ? String(data.address) : stay.address, image: data.image ? String(data.image) : stay.image, coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : stay.coordinates, price_total: Number(data.price) || stay.price_total };
+        return { ...stay, name: data.title ? String(data.title) : stay.name, type: data.description ? String(data.description) : stay.type, address: data.address ? String(data.address) : stay.address, image: data.image ? String(data.image) : stay.image, images: Array.isArray(data.images) && data.images.length ? data.images.map(String) : stay.images, coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : stay.coordinates, price_total: Number(data.price) || stay.price_total };
       } catch { return stay; }
     }));
     const next = { ...base, stays: refreshed };
@@ -192,13 +197,14 @@ export default function Home() {
 
           <Section title="Stays" icon={<BedDouble size={17} />} action={() => { setEditingId(null); setDraft(emptyDraft); setAddKind('stay'); }}>
             <div className="mb-3 flex gap-2"><Input value={link} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void importListing()} placeholder="Paste an Airbnb or Booking.com link" className="h-10" /><Button onClick={() => void importListing()} disabled={linkState === 'loading'} className="h-10 bg-black text-white"><span className="hidden sm:inline">Import listing</span>{linkState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Link2 />}</Button></div>
-            <div className="mb-3 flex min-h-5 items-center justify-between">{linkState === 'done' ? <p className="text-xs text-green-700">Listing details loaded. Check the price before deciding.</p> : linkState === 'fallback' ? <p className="text-xs text-amber-700">The site blocked its preview, so the link was added as an editable entry.</p> : <span />}<button onClick={() => void refreshStays()} disabled={stayState === 'loading'} className="text-xs text-black/45 hover:text-black">{stayState === 'loading' ? 'Refreshing…' : stayState === 'done' ? 'Details refreshed' : 'Refresh stay details'}</button></div>
+            <div className="mb-3 flex min-h-5 items-center justify-between gap-3">{linkState === 'done' ? <p className="text-xs text-green-700">{linkMessage}</p> : linkState === 'fallback' ? <p className="text-xs text-amber-700">{linkMessage}</p> : <span />}<button onClick={() => void refreshStays()} disabled={stayState === 'loading'} className="shrink-0 text-xs text-black/45 hover:text-black">{stayState === 'loading' ? 'Refreshing…' : stayState === 'done' ? 'Details refreshed' : 'Refresh stay details'}</button></div>
             <div className="grid gap-4 sm:grid-cols-2">{trip.stays.map((item) => <PreviewCard
               key={item.id}
               title={item.name}
               subtitle={item.type ?? 'Stay'}
               location={item.address ?? 'Location not added'}
               image={item.image}
+              images={item.images}
               price={money(item.price_total, trip.trip.currency)}
               selected={trip.selected.stay === item.id}
               placeholder={<BedDouble />}
@@ -253,18 +259,24 @@ function FlightGroup({ title, items, selected, currency, onSelect, onAdd }: { ti
 function SelectDot({ selected }: { selected: boolean }) { return <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selected ? 'border-black bg-black text-white' : 'text-transparent'}`}><Check size={12} /></span>; }
 function External({ item, label }: { item: string; label: string }) { return <a href={item} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" aria-label={label} className="rounded p-1 text-black/35 hover:bg-black/5 hover:text-black"><ExternalLink size={14} /></a>; }
 
-function PreviewCard({ title, subtitle, location, image, price, selected, placeholder, details, onSelect, actions }: {
-  title: string; subtitle: string; location: string; image?: string; price: string; selected: boolean;
+function PreviewCard({ title, subtitle, location, image, images, price, selected, placeholder, details, onSelect, actions }: {
+  title: string; subtitle: string; location: string; image?: string; images?: string[]; price: string; selected: boolean;
   placeholder: React.ReactNode; details: { icon: React.ReactNode; label: string }[];
   onSelect: () => void; actions?: React.ReactNode;
 }) {
+  const gallery = useMemo(() => [...new Set([image, ...(images ?? [])].filter((item): item is string => Boolean(item)))], [image, images]);
+  const [photo, setPhoto] = useState(0);
+  useEffect(() => { if (photo >= gallery.length) setPhoto(0); }, [gallery.length, photo]);
   return <Card className={`group relative gap-0 overflow-hidden rounded-2xl py-0 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${selected ? 'border-black ring-1 ring-black' : 'hover:border-black/25'}`}>
-    <button type="button" aria-pressed={selected} onClick={onSelect} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset">
-      <div className="relative h-48 overflow-hidden bg-[#efefed]">
-        {image ? <img src={image} alt={title} className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105 group-hover:brightness-[0.68]" /> : <div className="grid h-full place-items-center text-black/20 [&_svg]:size-8">{placeholder}</div>}
+    <div className="relative h-48 overflow-hidden bg-[#efefed]">
+      <button type="button" aria-label={`Select ${title}`} aria-pressed={selected} onClick={onSelect} className="block h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset">
+        {gallery[photo] ? <img src={gallery[photo]} alt={`${title} · photo ${photo + 1}`} className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105 group-hover:brightness-[0.68]" /> : <div className="grid h-full place-items-center text-black/20 [&_svg]:size-8">{placeholder}</div>}
         <span className="absolute right-4 top-4 grid size-10 translate-y-1 place-items-center rounded-full bg-white text-black opacity-0 shadow-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100"><ArrowRight size={18} /></span>
         <span className={`absolute left-4 top-4 grid size-7 place-items-center rounded-full border transition ${selected ? 'border-black bg-black text-white' : 'border-white/80 bg-white/90 text-transparent'}`}><Check size={14} /></span>
-      </div>
+      </button>
+      {gallery.length > 1 && <><button type="button" onClick={() => setPhoto((current) => (current - 1 + gallery.length) % gallery.length)} aria-label="Previous photo" className="absolute left-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-black opacity-0 shadow-sm transition group-hover:opacity-100 focus:opacity-100"><ChevronLeft size={16} /></button><button type="button" onClick={() => setPhoto((current) => (current + 1) % gallery.length)} aria-label="Next photo" className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-black opacity-0 shadow-sm transition group-hover:opacity-100 focus:opacity-100"><ChevronRight size={16} /></button><span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/65 px-2 py-1 text-[10px] font-medium text-white backdrop-blur"><Images size={11} /> {photo + 1}/{gallery.length}</span></>}
+    </div>
+    <button type="button" aria-pressed={selected} onClick={onSelect} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset">
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0"><h3 className="truncate text-lg font-medium tracking-[-0.02em] transition group-hover:text-black/65">{title}</h3><p className="mt-1 truncate text-sm text-black/45">{subtitle}</p></div>
