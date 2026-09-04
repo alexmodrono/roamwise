@@ -5,7 +5,6 @@ import {
   ArrowRight, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Code2, Download, ExternalLink, FileText,
   Images, Link2, LoaderCircle, MapPin, Pencil, Plane, Plus, Sparkles, Star, Trash2, Upload, Users, X,
 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -359,7 +358,7 @@ function AddEntryDialog({ kind, editing, draft, setDraft, onClose, onAdd }: { ki
 function Field({ label, value, setValue, placeholder, type = 'text' }: { label: string; value: string; setValue: (value: string) => void; placeholder: string; type?: string }) { return <label className="text-sm font-medium">{label}<Input value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} type={type} className="mt-1.5 h-10" /></label>; }
 
 function DeleteEntryDialog({ target, onCancel, onConfirm }: { target: DeleteTarget | null; onCancel: () => void; onConfirm: () => void }) {
-  return <AlertDialog open={Boolean(target)} onOpenChange={(open) => !open && onCancel()}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete {target?.name}?</AlertDialogTitle><AlertDialogDescription>This removes the {target?.kind} from the trip and recalculates the selected total. You can still undo it by reloading a saved YAML file.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={onConfirm} variant="destructive"><Trash2 /> Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
+  return <Dialog open={Boolean(target)} onOpenChange={(open) => !open && onCancel()}><DialogContent className="rounded-xl sm:max-w-sm"><DialogHeader><DialogTitle>Delete {target?.name}?</DialogTitle><DialogDescription>This removes the {target?.kind} from the trip and recalculates the selected total. You can still restore it from a saved YAML file.</DialogDescription></DialogHeader><DialogFooter><Button onClick={onCancel} variant="outline">Cancel</Button><Button onClick={onConfirm} variant="destructive"><Trash2 /> Delete</Button></DialogFooter></DialogContent></Dialog>;
 }
 
 function FinalVersion({ trip, total, perPerson, outbound, returnFlight, stay, activities, onClose }: { trip: TripDocument; total: number; perPerson: number; outbound?: FlightLeg; returnFlight?: FlightLeg; stay?: Stay; activities: Activity[]; onClose: () => void }) {
