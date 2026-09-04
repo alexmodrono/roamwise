@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   BedDouble, CalendarDays, Check, ChevronRight, CirclePlus, ExternalLink,
-  MapPin, Minus, Plane, Plus, ReceiptText, Share2, Sparkles, Trash2, Users,
+  Map as MapIcon, MapPin, Minus, Navigation, Plane, Plus, ReceiptText, Share2, Sparkles, Trash2, Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
-type Option = { id: string; name: string; detail: string; subdetail?: string; rating?: string; price: number; url?: string; custom?: boolean };
+type Option = { id: string; name: string; detail: string; subdetail?: string; rating?: string; price: number; url?: string; mapsUrl?: string; lat?: number; lng?: number; image?: string; custom?: boolean };
 type Activity = Option & { selected: boolean };
 
 const initialFlights: Option[] = [
@@ -21,10 +21,10 @@ const initialFlights: Option[] = [
 ];
 
 const initialStays: Option[] = [
-  { id: 'dryden', name: 'Dryden Gardens', detail: 'Private double room', subdetail: 'Broughton · 2 km to centre', rating: '9.2', price: 274, url: 'https://www.booking.com/hotel/gb/dryden-gardens.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'lavender', name: 'Lavender Guest House', detail: 'Double room · en-suite', subdetail: 'Edinburgh', rating: '8.9', price: 310, url: 'https://www.booking.com/hotel/gb/lavender-guest-house-edinburgh.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'moon', name: 'Moon suite apart', detail: 'Entire 1-bed apartment', subdetail: 'Grange · 47 m²', rating: 'New', price: 324, url: 'https://www.booking.com/searchresults.html?ss=Moon%20suite%20apart%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
-  { id: 'suite', name: 'Suite 3 En-suite', detail: 'Private en-suite double', subdetail: 'Edinburgh', rating: '9.0', price: 344, url: 'https://www.booking.com/searchresults.html?ss=Suite%203%20En-suite%20Room%20with%20Double%20Bed%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
+  { id: 'dryden', name: 'Dryden Gardens', detail: 'Private double room', subdetail: 'Broughton · about 2 km to centre', rating: '9.2', price: 274, image: '/stays/dryden.jpg', lat: 55.970, lng: -3.185, mapsUrl: 'https://maps.apple.com/?q=Dryden+Gardens+Edinburgh', url: 'https://www.booking.com/hotel/gb/dryden-gardens.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
+  { id: 'lavender', name: 'Lavender Guest House', detail: 'Double room · en-suite', subdetail: 'South Edinburgh', rating: '8.9', price: 310, image: '/stays/lavender.jpg', lat: 55.935, lng: -3.177, mapsUrl: 'https://maps.apple.com/?q=Lavender+Guest+House+Edinburgh', url: 'https://www.booking.com/hotel/gb/lavender-guest-house-edinburgh.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
+  { id: 'moon', name: 'Moon suite apart', detail: 'Entire 1-bed apartment', subdetail: 'Grange · 47 m²', rating: 'New', price: 324, image: '/stays/moon.jpg', lat: 55.936, lng: -3.190, mapsUrl: 'https://maps.apple.com/?q=Moon+suite+apart+Edinburgh', url: 'https://www.booking.com/searchresults.html?ss=Moon%20suite%20apart%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
+  { id: 'suite', name: 'Suite 3 En-suite', detail: 'Private en-suite double', subdetail: 'Central Edinburgh', rating: '9.0', price: 344, image: '/stays/suite.jpg', lat: 55.953, lng: -3.188, mapsUrl: 'https://maps.apple.com/?q=Suite+3+En-suite+Room+Edinburgh', url: 'https://www.booking.com/searchresults.html?ss=Suite%203%20En-suite%20Room%20with%20Double%20Bed%2C%20Edinburgh&checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1' },
 ];
 
 const euro = (value: number) => new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR', minimumFractionDigits: value % 1 ? 2 : 0 }).format(value);
@@ -40,6 +40,9 @@ export default function Home() {
   const [addType, setAddType] = useState<'flight' | 'stay' | 'activity'>('activity');
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [newDetail, setNewDetail] = useState('');
+  const [newLocation, setNewLocation] = useState('');
+  const [newImage, setNewImage] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [shareLabel, setShareLabel] = useState('Share trip');
 
@@ -49,8 +52,8 @@ export default function Home() {
     try {
       const saved = JSON.parse(raw);
       if (saved.travellers) setTravellers(saved.travellers);
-      if (saved.flights) setFlights(saved.flights);
-      if (saved.stays) setStays(saved.stays);
+      if (saved.flights) setFlights(saved.flights.map((item: Option) => ({ ...initialFlights.find((base) => base.id === item.id), ...item })));
+      if (saved.stays) setStays(saved.stays.map((item: Option) => ({ ...initialStays.find((base) => base.id === item.id), ...item })));
       if (saved.activities) setActivities(saved.activities);
       if (saved.selectedFlight) setSelectedFlight(saved.selectedFlight);
       if (saved.selectedStay) setSelectedStay(saved.selectedStay);
@@ -75,11 +78,11 @@ export default function Home() {
   function addOption() {
     const price = Number(newPrice);
     if (!newName.trim() || !Number.isFinite(price) || price < 0) return;
-    const item = { id: `${addType}-${Date.now()}`, name: newName.trim(), detail: 'Custom option', price, custom: true };
+    const item = { id: `${addType}-${Date.now()}`, name: newName.trim(), detail: newDetail.trim() || 'Custom option', subdetail: newLocation.trim() || undefined, image: newImage.trim() || undefined, mapsUrl: newLocation.trim() ? `https://maps.apple.com/?q=${encodeURIComponent(`${newName.trim()} ${newLocation.trim()}`)}` : undefined, price, custom: true };
     if (addType === 'flight') { setFlights((v) => [...v, item]); setSelectedFlight(item.id); }
     if (addType === 'stay') { setStays((v) => [...v, item]); setSelectedStay(item.id); }
     if (addType === 'activity') setActivities((v) => [...v, { ...item, selected: true }]);
-    setNewName(''); setNewPrice(''); setDialogOpen(false);
+    setNewName(''); setNewPrice(''); setNewDetail(''); setNewLocation(''); setNewImage(''); setDialogOpen(false);
   }
 
   function removeCustom(type: 'flight' | 'stay' | 'activity', id: string) {
@@ -142,10 +145,11 @@ export default function Home() {
             <div className="grid gap-3 sm:grid-cols-2">
               {stays.map((item) => <StayCard key={item.id} item={item} selected={item.id === selectedStay} travellers={travellers} onSelect={() => setSelectedStay(item.id)} onRemove={item.custom ? () => removeCustom('stay', item.id) : undefined} />)}
             </div>
+            {stay && <MapPanel stay={stay} />}
           </OptionSection>
 
           <OptionSection icon={<Sparkles size={18} />} step="3" title="Add activities" subtitle="Optional · total for everyone" onAdd={() => { setAddType('activity'); setDialogOpen(true); }}>
-            {activities.length === 0 ? <button onClick={() => { setAddType('activity'); setDialogOpen(true); }} className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#c8c1b4] bg-white/45 p-5 text-left transition-colors hover:bg-white"><span><strong className="text-sm">Nothing planned yet</strong><span className="mt-1 block text-sm text-muted-foreground">Add castle tickets, a tour, dinner—or anything else.</span></span><CirclePlus className="text-[#2d6a58]" /></button> : <div className="space-y-2">{activities.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-4"><Checkbox checked={item.selected} onCheckedChange={(checked) => setActivities((v) => v.map((x) => x.id === item.id ? { ...x, selected: Boolean(checked) } : x))} /><span className="flex-1 text-sm font-medium">{item.name}</span><strong className="text-sm">{euro(item.price)}</strong><button onClick={(event) => { event.preventDefault(); removeCustom('activity', item.id); }} className="ml-1 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={`Remove ${item.name}`}><Trash2 size={15} /></button></label>)}</div>}
+            {activities.length === 0 ? <button onClick={() => { setAddType('activity'); setDialogOpen(true); }} className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#c8c1b4] bg-white/45 p-5 text-left transition-colors hover:bg-white"><span><strong className="text-sm">Nothing planned yet</strong><span className="mt-1 block text-sm text-muted-foreground">Add castle tickets, a tour, dinner—or anything else.</span></span><CirclePlus className="text-[#2d6a58]" /></button> : <div className="grid gap-3 sm:grid-cols-2">{activities.map((item) => <label key={item.id} className={`flex cursor-pointer gap-3 overflow-hidden rounded-2xl border bg-white p-3 ${item.selected ? 'border-[#2d6a58]' : ''}`}>{item.image ? <img src={item.image} alt={`${item.name} visual preview`} className="size-20 shrink-0 rounded-xl object-cover" /> : <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-[#f4efe4] text-[#8d5b24]"><Sparkles size={20} /></div>}<Checkbox className="mt-1" checked={item.selected} onCheckedChange={(checked) => setActivities((v) => v.map((x) => x.id === item.id ? { ...x, selected: Boolean(checked) } : x))} /><span className="min-w-0 flex-1"><strong className="block truncate text-sm">{item.name}</strong><small className="mt-1 block truncate text-muted-foreground">{item.detail}</small><small className="mt-2 flex items-center gap-1 text-muted-foreground"><MapPin size={11} /> {item.subdetail ?? 'Location not added'}</small></span><span className="text-right"><strong className="text-sm">{euro(item.price)}</strong><button onClick={(event) => { event.preventDefault(); removeCustom('activity', item.id); }} className="mt-4 block rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={`Remove ${item.name}`}><Trash2 size={15} /></button></span></label>)}</div>}
           </OptionSection>
         </div>
 
@@ -162,7 +166,7 @@ export default function Home() {
         </aside>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}><DialogContent className="rounded-2xl p-6"><DialogHeader><DialogTitle>Add {addType}</DialogTitle><DialogDescription>{addType === 'flight' ? 'Enter the return price per person.' : 'Enter the total price for everyone.'}</DialogDescription></DialogHeader><div className="space-y-4 py-2"><label className="block text-sm font-medium">Name<Input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)} className="mt-2 h-10" placeholder={addType === 'activity' ? 'Ghost tour' : `New ${addType} option`} /></label><label className="block text-sm font-medium">Price in euros<Input type="number" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addOption()} className="mt-2 h-10" placeholder="0" /></label></div><DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button onClick={addOption} className="bg-[#2d6a58]">Add to trip</Button></DialogFooter></DialogContent></Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}><DialogContent className="rounded-2xl p-6 sm:max-w-md"><DialogHeader><DialogTitle>Add {addType}</DialogTitle><DialogDescription>{addType === 'flight' ? 'Enter the return price per person.' : 'Enter the total price for everyone.'}</DialogDescription></DialogHeader><div className="space-y-4 py-2"><label className="block text-sm font-medium">Name<Input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)} className="mt-2 h-10" placeholder={addType === 'activity' ? 'Ghost tour' : `New ${addType} option`} /></label><label className="block text-sm font-medium">Details<Input value={newDetail} onChange={(e) => setNewDetail(e.target.value)} className="mt-2 h-10" placeholder={addType === 'flight' ? 'Times, airline, stops…' : 'Room type, duration, notes…'} /></label>{addType !== 'flight' && <label className="block text-sm font-medium">Location<Input value={newLocation} onChange={(e) => setNewLocation(e.target.value)} className="mt-2 h-10" placeholder="Neighbourhood or address" /></label>}<label className="block text-sm font-medium">Photo URL <span className="font-normal text-muted-foreground">(optional)</span><Input type="url" value={newImage} onChange={(e) => setNewImage(e.target.value)} className="mt-2 h-10" placeholder="https://…" /></label><label className="block text-sm font-medium">Price in euros<Input type="number" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addOption()} className="mt-2 h-10" placeholder="0" /></label></div><DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button onClick={addOption} className="bg-[#2d6a58]">Add to trip</Button></DialogFooter></DialogContent></Dialog>
     </main>
   );
 }
@@ -176,7 +180,12 @@ function OptionRow({ item, selected, priceLabel, onSelect, onRemove }: { item: O
 }
 
 function StayCard({ item, selected, travellers, onSelect, onRemove }: { item: Option; selected: boolean; travellers: number; onSelect: () => void; onRemove?: () => void }) {
-  return <div className={`group relative rounded-2xl border bg-white p-5 transition-all ${selected ? 'border-[#2d6a58] ring-1 ring-[#2d6a58] shadow-[0_8px_24px_rgba(27,63,52,0.08)]' : 'hover:-translate-y-0.5 hover:border-[#9bb9ad]'}`}><button onClick={onSelect} className="w-full text-left"><div className="flex items-start justify-between gap-3"><div className="grid size-10 place-items-center rounded-xl bg-[#f4efe4] text-[#8d5b24]"><BedDouble size={18} /></div><div className="flex items-center gap-2">{item.rating && <span className="rounded-lg bg-[#f2f0ea] px-2 py-1 text-xs font-semibold">{item.rating}</span>}<span className={`grid size-5 place-items-center rounded-full ${selected ? 'bg-[#2d6a58] text-white' : 'border text-transparent'}`}><Check size={13} /></span></div></div><h3 className="mt-4 font-semibold">{item.name}</h3><p className="mt-1 text-sm text-muted-foreground">{item.detail}</p><p className="mt-3 text-xs text-muted-foreground">{item.subdetail ?? 'Added by you'}</p><div className="mt-4 flex items-end justify-between border-t pt-4"><span className="text-xs text-muted-foreground">Total stay</span><span><strong className="text-lg">{euro(item.price)}</strong><small className="ml-1 text-muted-foreground">· {euro(item.price / travellers)} pp</small></span></div></button><div className="mt-3 flex justify-end gap-3">{item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#2d6a58] hover:underline">View stay <ChevronRight size={12} /></a>}{onRemove && <button onClick={onRemove} className="text-xs text-muted-foreground hover:text-foreground">Remove</button>}</div></div>;
+  return <div className={`group relative overflow-hidden rounded-2xl border bg-white transition-all ${selected ? 'border-[#2d6a58] ring-1 ring-[#2d6a58] shadow-[0_8px_24px_rgba(27,63,52,0.08)]' : 'hover:-translate-y-0.5 hover:border-[#9bb9ad]'}`}><button onClick={onSelect} className="w-full text-left">{item.image ? <div className="relative h-36 overflow-hidden bg-muted"><img src={item.image} alt={`${item.name} visual preview`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.025]" /><span className="absolute bottom-2 left-2 rounded-full bg-black/45 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">Visual preview</span></div> : <div className="grid h-24 place-items-center bg-[#f4efe4] text-[#8d5b24]"><BedDouble size={24} /></div>}<div className="p-5"><div className="flex items-start justify-between gap-3"><div>{item.rating && <span className="rounded-lg bg-[#f2f0ea] px-2 py-1 text-xs font-semibold">{item.rating}</span>}</div><span className={`grid size-5 place-items-center rounded-full ${selected ? 'bg-[#2d6a58] text-white' : 'border text-transparent'}`}><Check size={13} /></span></div><h3 className="mt-3 font-semibold">{item.name}</h3><p className="mt-1 text-sm text-muted-foreground">{item.detail}</p><p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin size={12} /> {item.subdetail ?? 'Location not added'}</p><div className="mt-4 flex items-end justify-between border-t pt-4"><span className="text-xs text-muted-foreground">Total stay</span><span><strong className="text-lg">{euro(item.price)}</strong><small className="ml-1 text-muted-foreground">· {euro(item.price / travellers)} pp</small></span></div></div></button><div className="flex justify-end gap-3 px-5 pb-4">{item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#2d6a58] hover:underline">View stay <ChevronRight size={12} /></a>}{item.mapsUrl && <a href={item.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#2d6a58] hover:underline">Apple Maps <Navigation size={11} /></a>}{onRemove && <button onClick={onRemove} className="text-xs text-muted-foreground hover:text-foreground">Remove</button>}</div></div>;
+}
+
+function MapPanel({ stay }: { stay: Option }) {
+  const mapSrc = stay.lat && stay.lng ? `https://www.openstreetmap.org/export/embed.html?bbox=-3.235%2C55.925%2C-3.145%2C55.985&layer=mapnik&marker=${stay.lat}%2C${stay.lng}` : null;
+  return <div className="mt-4 overflow-hidden rounded-2xl border bg-white"><div className="flex items-center justify-between gap-4 border-b px-4 py-3"><div className="flex items-center gap-2"><MapIcon size={17} className="text-[#2d6a58]" /><div><p className="text-sm font-semibold">{stay.name} on the map</p><p className="text-xs text-muted-foreground">Approximate area · confirm on the listing</p></div></div>{stay.mapsUrl && <Button render={<a href={stay.mapsUrl} target="_blank" rel="noreferrer" />} variant="outline" size="sm" className="rounded-xl"><Navigation /> Open in Apple Maps</Button>}</div>{mapSrc ? <iframe key={mapSrc} src={mapSrc} title={`Map around ${stay.name}`} loading="lazy" className="h-64 w-full border-0 grayscale-[15%]" /> : <div className="grid h-40 place-items-center text-sm text-muted-foreground">Add a location to see it here.</div>}</div>;
 }
 
 function PriceRow({ label, value, muted }: { label: string; value: number; muted?: boolean }) { return <div className={`flex justify-between ${muted ? 'text-white/35' : ''}`}><span className={muted ? '' : 'text-white/60'}>{label}</span><span>{euro(value)}</span></div>; }
