@@ -11,7 +11,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TripMap } from '@/components/trip-map';
-import { DEFAULT_TRIP, parseTrip, stringifyTrip, type Activity, type Flight, type Stay, type TripDocument } from '@/lib/trip-schema';
+import { DEFAULT_TRIP, parseTrip, stringifyTrip, type Activity, type FlightLeg, type Stay, type TripDocument } from '@/lib/trip-schema';
 
 type AddKind = 'flight' | 'stay' | 'activity';
 type Draft = { name: string; detail: string; address: string; price: string; image: string; url: string; lat: string; lng: string };
@@ -31,7 +31,10 @@ export default function Home() {
   const [sourceError, setSourceError] = useState('');
   const [link, setLink] = useState('');
   const [linkState, setLinkState] = useState<'idle' | 'loading' | 'done' | 'fallback'>('idle');
+  const [stayState, setStayState] = useState<'idle' | 'loading' | 'done'>('idle');
   const [addKind, setAddKind] = useState<AddKind | null>(null);
+  const [flightDirection, setFlightDirection] = useState<'outbound' | 'return'>('outbound');
+  const [flightState, setFlightState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [finalOpen, setFinalOpen] = useState(false);
@@ -40,8 +43,9 @@ export default function Home() {
 
   useEffect(() => {
     const stored = localStorage.getItem('roamwise-trip-v2');
-    if (!stored) return;
-    try { const parsed = parseTrip(stored); setTrip(parsed); setSource(stringifyTrip(parsed)); } catch { /* Keep the bundled example. */ }
+    let base = DEFAULT_TRIP;
+    if (stored) { try { base = parseTrip(stored); setTrip(base); setSource(stringifyTrip(base)); } catch { /* Keep the bundled example. */ } }
+    void refreshStays(base, false);
   }, []);
 
   function commit(next: TripDocument) {
@@ -51,10 +55,11 @@ export default function Home() {
     localStorage.setItem('roamwise-trip-v2', yaml);
   }
 
-  const selectedFlight = trip.flights.find((item) => item.id === trip.selected.flight);
+  const selectedOutbound = trip.flights.outbound.find((item) => item.id === trip.selected.outbound_flight);
+  const selectedReturn = trip.flights.return.find((item) => item.id === trip.selected.return_flight);
   const selectedStay = trip.stays.find((item) => item.id === trip.selected.stay);
   const selectedActivities = trip.activities.filter((item) => trip.selected.activities.includes(item.id));
-  const total = (selectedFlight?.price_per_person ?? 0) * trip.trip.travellers + (selectedStay?.price_total ?? 0) + selectedActivities.reduce((sum, item) => sum + item.price_total, 0);
+  const total = ((selectedOutbound?.price_per_person ?? 0) + (selectedReturn?.price_per_person ?? 0)) * trip.trip.travellers + (selectedStay?.price_total ?? 0) + selectedActivities.reduce((sum, item) => sum + item.price_total, 0);
   const perPerson = total / Math.max(1, trip.trip.travellers);
 
   function applySource() {
@@ -118,8 +123,9 @@ export default function Home() {
       commit({ ...trip, activities: [...trip.activities, item], selected: { ...trip.selected, activities: [...trip.selected.activities, id] } });
     } else {
       const origin = trip.trip.origin.code ?? trip.trip.origin.name; const destination = trip.trip.destination.code ?? trip.trip.destination.name;
-      const item: Flight = { id, airline: draft.name, price_per_person: Number(draft.price) || 0, url: draft.url || undefined, outbound: { from: origin, to: destination, depart: `${trip.trip.dates.start}T00:00`, arrive: `${trip.trip.dates.start}T00:00` }, return: { from: destination, to: origin, depart: `${trip.trip.dates.end}T00:00`, arrive: `${trip.trip.dates.end}T00:00` } };
-      commit({ ...trip, flights: [...trip.flights, item], selected: { ...trip.selected, flight: id } });
+      const isOutbound = flightDirection === 'outbound';
+      const item: FlightLeg = { id, airline: draft.name, price_per_person: Number(draft.price) || 0, url: draft.url || undefined, from: isOutbound ? origin : destination, to: isOutbound ? destination : origin, depart: `${isOutbound ? trip.trip.dates.start : trip.trip.dates.end}T00:00`, arrive: `${isOutbound ? trip.trip.dates.start : trip.trip.dates.end}T00:00` };
+      commit({ ...trip, flights: { ...trip.flights, [flightDirection]: [...trip.flights[flightDirection], item] }, selected: { ...trip.selected, [isOutbound ? 'outbound_flight' : 'return_flight']: id } });
     }
     setDraft(emptyDraft); setEditingId(null); setAddKind(null);
   }
@@ -127,6 +133,36 @@ export default function Home() {
   function toggleActivity(id: string, checked: boolean) {
     const activities = checked ? [...trip.selected.activities, id] : trip.selected.activities.filter((item) => item !== id);
     commit({ ...trip, selected: { ...trip.selected, activities: [...new Set(activities)] } });
+  }
+
+  async function refreshFlights() {
+    const origin = trip.trip.origin.code; const destination = trip.trip.destination.code;
+    if (!origin || !destination) { setFlightState('error'); return; }
+    setFlightState('loading');
+    try {
+      const response = await fetch('/api/flights', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ origin, destination, start: trip.trip.dates.start, end: trip.trip.dates.end, currency: trip.trip.currency }) });
+      const data = await response.json() as TripDocument['flights'] & { error?: string };
+      if (!response.ok) throw new Error(data.error);
+      commit({ ...trip, flights: data, selected: { ...trip.selected, outbound_flight: data.outbound[0]?.id, return_flight: data.return[0]?.id } });
+      setFlightState('done'); setTimeout(() => setFlightState('idle'), 2500);
+    } catch { setFlightState('error'); }
+  }
+
+  async function refreshStays(base = trip, visible = true) {
+    if (visible) setStayState('loading');
+    const refreshed = await Promise.all(base.stays.map(async (stay) => {
+      if (!stay.url) return stay;
+      try {
+        const response = await fetch('/api/unfurl', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: stay.url }) });
+        if (!response.ok) return stay;
+        const data = await response.json() as Record<string, unknown>;
+        const coordinate = data.coordinates as { lat?: number; lng?: number } | undefined;
+        return { ...stay, name: data.title ? String(data.title) : stay.name, type: data.description ? String(data.description) : stay.type, address: data.address ? String(data.address) : stay.address, image: data.image ? String(data.image) : stay.image, coordinates: coordinate?.lat && coordinate?.lng ? { lat: coordinate.lat, lng: coordinate.lng } : stay.coordinates, price_total: Number(data.price) || stay.price_total };
+      } catch { return stay; }
+    }));
+    const next = { ...base, stays: refreshed };
+    setTrip(next); const yaml = stringifyTrip(next); setSource(yaml); localStorage.setItem('roamwise-trip-v2', yaml);
+    if (visible) { setStayState('done'); setTimeout(() => setStayState('idle'), 2200); }
   }
 
   return <main onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void readTripFile(event.dataTransfer.files[0]); }} className={`min-h-screen bg-white text-[#171717] ${finalOpen ? 'final-mode' : ''}`}>
@@ -151,13 +187,11 @@ export default function Home() {
             <div className="text-left sm:text-right"><p className="text-3xl font-semibold tracking-[-0.04em]">{money(perPerson, trip.trip.currency)}</p><p className="text-xs text-black/45">per person · {money(total, trip.trip.currency)} total</p></div>
           </div>
 
-          <Section title="Flights" icon={<Plane size={17} />} action={() => { setDraft(emptyDraft); setAddKind('flight'); }}>
-            <div className="space-y-2">{trip.flights.map((item) => <button key={item.id} onClick={() => commit({ ...trip, selected: { ...trip.selected, flight: item.id } })} className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left ${trip.selected.flight === item.id ? 'border-black bg-[#fafafa]' : 'hover:bg-[#fafafa]'}`}><SelectDot selected={trip.selected.flight === item.id} /><div className="min-w-0 flex-1"><p className="font-medium">{item.airline}</p><p className="mt-1 truncate text-sm text-black/45">{item.outbound.from} {time(item.outbound.depart)} → {item.outbound.to} {time(item.outbound.arrive)} · return {time(item.return.depart)}</p></div><strong className="text-sm">{money(item.price_per_person, trip.trip.currency)} pp</strong>{item.url && <External item={item.url} label="Flight listing" />}</button>)}</div>
-          </Section>
+          <section><div className="mb-3 flex items-center justify-between"><div><h2 className="flex items-center gap-2 text-base font-semibold"><Plane size={17} />Flights</h2><p className="mt-1 text-xs text-black/40">{trip.flights.provider ? `Live via ${trip.flights.provider}` : 'Trip source'}{trip.flights.updated_at ? ` · checked ${new Date(trip.flights.updated_at).toISOString().slice(11, 16)} UTC` : ''}</p></div><Button onClick={() => void refreshFlights()} disabled={flightState === 'loading'} variant="outline" size="sm">{flightState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Download />} {flightState === 'done' ? 'Updated' : 'Refresh live'}</Button></div>{flightState === 'error' && <p className="mb-3 text-xs text-red-600">No live direct fares were returned. Existing options are unchanged.</p>}<div className="grid gap-4 md:grid-cols-2"><FlightGroup title="Outbound" items={trip.flights.outbound} selected={trip.selected.outbound_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, outbound_flight: id } })} onAdd={() => { setFlightDirection('outbound'); setDraft(emptyDraft); setAddKind('flight'); }} /><FlightGroup title="Return" items={trip.flights.return} selected={trip.selected.return_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, return_flight: id } })} onAdd={() => { setFlightDirection('return'); setDraft(emptyDraft); setAddKind('flight'); }} /></div></section>
 
           <Section title="Stays" icon={<BedDouble size={17} />} action={() => { setEditingId(null); setDraft(emptyDraft); setAddKind('stay'); }}>
             <div className="mb-3 flex gap-2"><Input value={link} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void importListing()} placeholder="Paste an Airbnb or Booking.com link" className="h-10" /><Button onClick={() => void importListing()} disabled={linkState === 'loading'} className="h-10 bg-black text-white"><span className="hidden sm:inline">Import listing</span>{linkState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Link2 />}</Button></div>
-            {linkState === 'done' && <p className="mb-3 text-xs text-green-700">Listing details loaded. Check the price before deciding.</p>}{linkState === 'fallback' && <p className="mb-3 text-xs text-amber-700">The site blocked its preview, so the link was added as an editable entry.</p>}
+            <div className="mb-3 flex min-h-5 items-center justify-between">{linkState === 'done' ? <p className="text-xs text-green-700">Listing details loaded. Check the price before deciding.</p> : linkState === 'fallback' ? <p className="text-xs text-amber-700">The site blocked its preview, so the link was added as an editable entry.</p> : <span />}<button onClick={() => void refreshStays()} disabled={stayState === 'loading'} className="text-xs text-black/45 hover:text-black">{stayState === 'loading' ? 'Refreshing…' : stayState === 'done' ? 'Details refreshed' : 'Refresh stay details'}</button></div>
             <div className="grid gap-3 sm:grid-cols-2">{trip.stays.map((item) => <div key={item.id} className={`overflow-hidden rounded-xl border text-left transition ${trip.selected.stay === item.id ? 'border-black ring-1 ring-black' : 'hover:border-black/35'}`}><button onClick={() => commit({ ...trip, selected: { ...trip.selected, stay: item.id } })} className="block w-full text-left"><div className="relative h-28 bg-[#eee]">{item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-black/25"><BedDouble /></div>}<span className={`absolute right-2 top-2 grid size-6 place-items-center rounded-full ${trip.selected.stay === item.id ? 'bg-black text-white' : 'bg-white text-transparent'}`}><Check size={13} /></span></div><div className="px-4 pt-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-medium">{item.name}</p><p className="mt-1 truncate text-xs text-black/45">{item.type ?? 'Stay'}</p></div>{item.rating && <span className="rounded bg-[#f0f0f0] px-1.5 py-1 text-[11px] font-medium">{item.rating}</span>}</div><p className="mt-3 flex items-center gap-1 text-xs text-black/45"><MapPin size={11} /> {item.address ?? 'Location not added'}</p></div></button><div className="mx-4 mt-3 flex items-center justify-between border-t py-3"><strong>{money(item.price_total, trip.trip.currency)}</strong><div className="flex items-center gap-2"><button onClick={() => { setEditingId(item.id); setDraft({ name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '' }); setAddKind('stay'); }} className="text-xs text-black/45 hover:text-black">Edit</button>{item.url && <External item={item.url} label="Stay listing" />}</div></div></div>)}</div>
           </Section>
 
@@ -172,12 +206,15 @@ export default function Home() {
     </div>
 
     <AddEntryDialog kind={addKind} editing={Boolean(editingId)} draft={draft} setDraft={setDraft} onClose={() => { setAddKind(null); setEditingId(null); }} onAdd={addEntry} />
-    {finalOpen && <FinalVersion trip={trip} total={total} perPerson={perPerson} flight={selectedFlight} stay={selectedStay} activities={selectedActivities} onClose={() => setFinalOpen(false)} />}
+    {finalOpen && <FinalVersion trip={trip} total={total} perPerson={perPerson} outbound={selectedOutbound} returnFlight={selectedReturn} stay={selectedStay} activities={selectedActivities} onClose={() => setFinalOpen(false)} />}
   </main>;
 }
 
 function Section({ title, icon, action, children }: { title: string; icon: React.ReactNode; action: () => void; children: React.ReactNode }) {
   return <section><div className="mb-3 flex items-center justify-between"><h2 className="flex items-center gap-2 text-base font-semibold">{icon}{title}</h2><Button onClick={action} variant="ghost" size="sm"><Plus /> Add</Button></div>{children}</section>;
+}
+function FlightGroup({ title, items, selected, currency, onSelect, onAdd }: { title: string; items: FlightLeg[]; selected?: string; currency: string; onSelect: (id: string) => void; onAdd: () => void }) {
+  return <div><div className="mb-2 flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-black/40">{title}</h3><button onClick={onAdd} className="text-xs text-black/45 hover:text-black">+ Add</button></div><div className="space-y-2">{items.map((item) => <button key={item.id} onClick={() => onSelect(item.id)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left ${selected === item.id ? 'border-black bg-[#fafafa]' : 'hover:bg-[#fafafa]'}`}><SelectDot selected={selected === item.id} /><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="text-sm font-medium">{item.airline}</p>{item.flight_number && <span className="text-[11px] text-black/40">{item.flight_number}</span>}{item.live && <span className="rounded bg-green-50 px-1.5 py-0.5 text-[10px] font-medium text-green-700">Live</span>}</div><p className="mt-1 text-xs text-black/45">{item.from} {time(item.depart)} → {item.to} {time(item.arrive)}</p></div><strong className="text-sm">{money(item.price_per_person, currency)}</strong>{item.url && <External item={item.url} label={`${title} flight listing`} />}</button>)}{!items.length && <button onClick={onAdd} className="w-full rounded-xl border border-dashed p-4 text-sm text-black/40">Add a {title.toLowerCase()} option</button>}</div></div>;
 }
 function SelectDot({ selected }: { selected: boolean }) { return <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selected ? 'border-black bg-black text-white' : 'text-transparent'}`}><Check size={12} /></span>; }
 function External({ item, label }: { item: string; label: string }) { return <a href={item} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" aria-label={label} className="rounded p-1 text-black/35 hover:bg-black/5 hover:text-black"><ExternalLink size={14} /></a>; }
@@ -192,7 +229,7 @@ function AddEntryDialog({ kind, editing, draft, setDraft, onClose, onAdd }: { ki
 }
 function Field({ label, value, setValue, placeholder, type = 'text' }: { label: string; value: string; setValue: (value: string) => void; placeholder: string; type?: string }) { return <label className="text-sm font-medium">{label}<Input value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} type={type} className="mt-1.5 h-10" /></label>; }
 
-function FinalVersion({ trip, total, perPerson, flight, stay, activities, onClose }: { trip: TripDocument; total: number; perPerson: number; flight?: Flight; stay?: Stay; activities: Activity[]; onClose: () => void }) {
-  return <div className="final-overlay fixed inset-0 z-[90] overflow-y-auto bg-[#eceae6] print:static print:overflow-visible print:bg-white"><div className="no-print fixed right-5 top-5 z-10 flex gap-2"><Button onClick={onClose} variant="outline" className="bg-white"><X /> Close</Button><Button onClick={() => window.print()} className="bg-black text-white"><Download /> Save as PDF</Button></div><article className="print-sheet mx-auto my-10 w-[min(900px,calc(100%-32px))] overflow-hidden bg-white shadow-xl print:my-0 print:w-full print:shadow-none"><header className="bg-black p-10 text-white"><div className="flex items-start justify-between gap-8"><div><p className="text-xs uppercase tracking-[0.16em] text-white/50">Final itinerary</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{trip.trip.title}</h1><p className="mt-4 text-white/55">{shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)} · {trip.trip.travellers} travellers</p></div><div className="text-right"><p className="text-3xl font-semibold">{money(perPerson, trip.trip.currency)}</p><p className="mt-1 text-xs text-white/45">per person</p></div></div></header><div className="grid gap-8 p-10 md:grid-cols-[1fr_1fr]"><div className="space-y-7"><FinalBlock icon={<Plane />} title="Flights"><p className="font-medium">{flight?.airline ?? 'Not selected'}</p>{flight && <><p>{flight.outbound.from} {time(flight.outbound.depart)} → {flight.outbound.to} {time(flight.outbound.arrive)}</p><p>{flight.return.from} {time(flight.return.depart)} → {flight.return.to} {time(flight.return.arrive)}</p></>}</FinalBlock><FinalBlock icon={<BedDouble />} title="Stay">{stay ? <><p className="font-medium">{stay.name}</p><p>{stay.type}</p><p>{stay.address}</p></> : <p>Not selected</p>}</FinalBlock><FinalBlock icon={<Sparkles />} title="Activities">{activities.length ? activities.map((item) => <p key={item.id}><strong>{item.name}</strong>{item.address ? ` · ${item.address}` : ''}</p>) : <p>No activities added</p>}</FinalBlock><div className="border-t pt-5"><div className="flex justify-between text-sm"><span>Total trip</span><strong>{money(total, trip.trip.currency)}</strong></div><div className="mt-2 flex justify-between text-sm"><span>Per person</span><strong>{money(perPerson, trip.trip.currency)}</strong></div></div></div><div className="min-h-[440px] overflow-hidden rounded-xl border"><TripMap trip={trip} compact /></div></div><footer className="border-t px-10 py-5 text-xs text-black/40">Generated with Roamwise · Verify live prices and booking details before purchase.</footer></article></div>;
+function FinalVersion({ trip, total, perPerson, outbound, returnFlight, stay, activities, onClose }: { trip: TripDocument; total: number; perPerson: number; outbound?: FlightLeg; returnFlight?: FlightLeg; stay?: Stay; activities: Activity[]; onClose: () => void }) {
+  return <div className="final-overlay fixed inset-0 z-[90] overflow-y-auto bg-[#eceae6] print:static print:overflow-visible print:bg-white"><div className="no-print fixed right-5 top-5 z-10 flex gap-2"><Button onClick={onClose} variant="outline" className="bg-white"><X /> Close</Button><Button onClick={() => window.print()} className="bg-black text-white"><Download /> Save as PDF</Button></div><article className="print-sheet mx-auto my-10 w-[min(900px,calc(100%-32px))] overflow-hidden bg-white shadow-xl print:my-0 print:w-full print:shadow-none"><header className="bg-black p-10 text-white"><div className="flex items-start justify-between gap-8"><div><p className="text-xs uppercase tracking-[0.16em] text-white/50">Final itinerary</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{trip.trip.title}</h1><p className="mt-4 text-white/55">{shortDate(trip.trip.dates.start)}–{shortDate(trip.trip.dates.end)} · {trip.trip.travellers} travellers</p></div><div className="text-right"><p className="text-3xl font-semibold">{money(perPerson, trip.trip.currency)}</p><p className="mt-1 text-xs text-white/45">per person</p></div></div></header><div className="grid gap-8 p-10 md:grid-cols-[1fr_1fr]"><div className="space-y-7"><FinalBlock icon={<Plane />} title="Flights">{outbound ? <p><strong>{outbound.flight_number ?? outbound.airline}</strong> · {outbound.from} {time(outbound.depart)} → {outbound.to} {time(outbound.arrive)} · {money(outbound.price_per_person, trip.trip.currency)}</p> : <p>Outbound not selected</p>}{returnFlight ? <p><strong>{returnFlight.flight_number ?? returnFlight.airline}</strong> · {returnFlight.from} {time(returnFlight.depart)} → {returnFlight.to} {time(returnFlight.arrive)} · {money(returnFlight.price_per_person, trip.trip.currency)}</p> : <p>Return not selected</p>}</FinalBlock><FinalBlock icon={<BedDouble />} title="Stay">{stay ? <><p className="font-medium">{stay.name}</p><p>{stay.type}</p><p>{stay.address}</p></> : <p>Not selected</p>}</FinalBlock><FinalBlock icon={<Sparkles />} title="Activities">{activities.length ? activities.map((item) => <p key={item.id}><strong>{item.name}</strong>{item.address ? ` · ${item.address}` : ''}</p>) : <p>No activities added</p>}</FinalBlock><div className="border-t pt-5"><div className="flex justify-between text-sm"><span>Total trip</span><strong>{money(total, trip.trip.currency)}</strong></div><div className="mt-2 flex justify-between text-sm"><span>Per person</span><strong>{money(perPerson, trip.trip.currency)}</strong></div></div></div><div className="min-h-[440px] overflow-hidden rounded-xl border"><TripMap trip={trip} compact /></div></div><footer className="border-t px-10 py-5 text-xs text-black/40">Generated with Roamwise · Verify live prices and booking details before purchase.</footer></article></div>;
 }
 function FinalBlock({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) { return <section><h2 className="mb-3 flex items-center gap-2 text-sm font-semibold [&_svg]:size-4">{icon}{title}</h2><div className="space-y-1.5 text-sm text-black/55">{children}</div></section>; }

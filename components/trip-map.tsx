@@ -54,11 +54,12 @@ export function TripMap({ trip, compact = false }: { trip: TripDocument; compact
     let disposed = false;
     let appleMap: { destroy?: () => void } | undefined;
     setMapError('');
-    const start = () => {
+    const start = async () => {
       const mapkit = (window as unknown as { mapkit?: any }).mapkit;
       if (!mapkit || disposed || !mapRef.current) return;
       try {
-        mapkit.init({ authorizationCallback: (done: (token: string) => void) => done(appleToken), language: 'en' });
+        await mapkit.init({ authorizationCallback: (done: (token: string) => void) => done(appleToken), language: 'en' });
+        if (!mapkit.Map || !mapkit.MarkerAnnotation || !mapkit.PolylineOverlay) throw new Error('Required MapKit libraries did not load');
         const map = new mapkit.Map(mapRef.current, { showsZoomControl: !compact, showsMapTypeControl: !compact });
         appleMap = map;
         const items: any[] = [];
@@ -78,7 +79,7 @@ export function TripMap({ trip, compact = false }: { trip: TripDocument; compact
           map.addOverlay(overlay); items.push(overlay);
         }
         if (items.length) map.showItems(items, { animate: true, padding: new mapkit.Padding(50, 50, 50, 50) });
-      } catch { setMapError('Apple Maps could not start. Check the token and allowed domain.'); }
+      } catch (error) { setMapError(`Apple Maps could not start: ${error instanceof Error ? error.message : 'check the token and allowed domain'}`); }
     };
     const existing = document.querySelector<HTMLScriptElement>('script[data-roamwise-mapkit]');
     if ((window as unknown as { mapkit?: unknown }).mapkit) start();
@@ -87,6 +88,7 @@ export function TripMap({ trip, compact = false }: { trip: TripDocument; compact
       const script = document.createElement('script');
       script.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js';
       script.crossOrigin = 'anonymous'; script.dataset.roamwiseMapkit = 'true'; script.async = true;
+      script.dataset.libraries = 'map,annotations,overlays';
       script.addEventListener('load', start, { once: true }); script.addEventListener('error', () => setMapError('Apple MapKit could not be loaded.'), { once: true });
       document.head.appendChild(script);
     }

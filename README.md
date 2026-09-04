@@ -2,7 +2,7 @@
 
 A lightweight trip-comparison board for choosing flights, accommodation and optional activities together. It keeps the total and per-person cost visible as options change, maps every location, and generates a print-ready final itinerary.
 
-The included example uses a Madrid to Edinburgh weekend. Trips use the portable `roamwise/v1` YAML format, and custom options and selections are saved in the browser.
+The included example uses a Madrid to Edinburgh weekend. Trips use the portable `roamwise/v2` YAML format, and custom options and selections are saved in the browser.
 
 ## Trip files
 
