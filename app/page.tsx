@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BedDouble, CalendarDays, Check, Code2, Download, ExternalLink, FileText,
-  Link2, LoaderCircle, MapPin, Plane, Plus, Share2, Sparkles, Upload, Users, X,
+  ArrowRight, BedDouble, CalendarDays, Check, Clock3, Code2, Download, ExternalLink, FileText,
+  Link2, LoaderCircle, MapPin, Plane, Plus, Sparkles, Star, Upload, Users, X,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -192,11 +193,44 @@ export default function Home() {
           <Section title="Stays" icon={<BedDouble size={17} />} action={() => { setEditingId(null); setDraft(emptyDraft); setAddKind('stay'); }}>
             <div className="mb-3 flex gap-2"><Input value={link} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void importListing()} placeholder="Paste an Airbnb or Booking.com link" className="h-10" /><Button onClick={() => void importListing()} disabled={linkState === 'loading'} className="h-10 bg-black text-white"><span className="hidden sm:inline">Import listing</span>{linkState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Link2 />}</Button></div>
             <div className="mb-3 flex min-h-5 items-center justify-between">{linkState === 'done' ? <p className="text-xs text-green-700">Listing details loaded. Check the price before deciding.</p> : linkState === 'fallback' ? <p className="text-xs text-amber-700">The site blocked its preview, so the link was added as an editable entry.</p> : <span />}<button onClick={() => void refreshStays()} disabled={stayState === 'loading'} className="text-xs text-black/45 hover:text-black">{stayState === 'loading' ? 'Refreshing…' : stayState === 'done' ? 'Details refreshed' : 'Refresh stay details'}</button></div>
-            <div className="grid gap-3 sm:grid-cols-2">{trip.stays.map((item) => <div key={item.id} className={`overflow-hidden rounded-xl border text-left transition ${trip.selected.stay === item.id ? 'border-black ring-1 ring-black' : 'hover:border-black/35'}`}><button onClick={() => commit({ ...trip, selected: { ...trip.selected, stay: item.id } })} className="block w-full text-left"><div className="relative h-28 bg-[#eee]">{item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-black/25"><BedDouble /></div>}<span className={`absolute right-2 top-2 grid size-6 place-items-center rounded-full ${trip.selected.stay === item.id ? 'bg-black text-white' : 'bg-white text-transparent'}`}><Check size={13} /></span></div><div className="px-4 pt-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-medium">{item.name}</p><p className="mt-1 truncate text-xs text-black/45">{item.type ?? 'Stay'}</p></div>{item.rating && <span className="rounded bg-[#f0f0f0] px-1.5 py-1 text-[11px] font-medium">{item.rating}</span>}</div><p className="mt-3 flex items-center gap-1 text-xs text-black/45"><MapPin size={11} /> {item.address ?? 'Location not added'}</p></div></button><div className="mx-4 mt-3 flex items-center justify-between border-t py-3"><strong>{money(item.price_total, trip.trip.currency)}</strong><div className="flex items-center gap-2"><button onClick={() => { setEditingId(item.id); setDraft({ name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '' }); setAddKind('stay'); }} className="text-xs text-black/45 hover:text-black">Edit</button>{item.url && <External item={item.url} label="Stay listing" />}</div></div></div>)}</div>
+            <div className="grid gap-4 sm:grid-cols-2">{trip.stays.map((item) => <PreviewCard
+              key={item.id}
+              title={item.name}
+              subtitle={item.type ?? 'Stay'}
+              location={item.address ?? 'Location not added'}
+              image={item.image}
+              price={money(item.price_total, trip.trip.currency)}
+              selected={trip.selected.stay === item.id}
+              placeholder={<BedDouble />}
+              details={[
+                { icon: <BedDouble />, label: item.type ?? 'Stay' },
+                { icon: <Star />, label: item.rating ? `${item.rating} rating` : 'Not rated' },
+              ]}
+              onSelect={() => commit({ ...trip, selected: { ...trip.selected, stay: item.id } })}
+              actions={<><button onClick={() => { setEditingId(item.id); setDraft({ name: item.name, detail: item.type ?? '', address: item.address ?? '', price: String(item.price_total), image: item.image ?? '', url: item.url ?? '', lat: item.coordinates ? String(item.coordinates.lat) : '', lng: item.coordinates ? String(item.coordinates.lng) : '' }); setAddKind('stay'); }} className="text-xs font-medium text-black/45 hover:text-black">Edit</button>{item.url && <External item={item.url} label="Stay listing" />}</>}
+            />)}</div>
           </Section>
 
           <Section title="Activities" icon={<Sparkles size={17} />} action={() => { setDraft(emptyDraft); setAddKind('activity'); }}>
-            {trip.activities.length ? <div className="space-y-2">{trip.activities.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl border p-3"><Checkbox checked={trip.selected.activities.includes(item.id)} onCheckedChange={(checked) => toggleActivity(item.id, Boolean(checked))} />{item.image ? <img src={item.image} alt="" className="size-12 rounded-lg object-cover" /> : <div className="grid size-12 place-items-center rounded-lg bg-[#f2f2f2]"><Sparkles size={16} /></div>}<div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{item.name}</p><p className="mt-1 truncate text-xs text-black/45">{item.address ?? 'Location not added'}</p></div><strong className="text-sm">{money(item.price_total, trip.trip.currency)}</strong></label>)}</div> : <button onClick={() => { setDraft(emptyDraft); setAddKind('activity'); }} className="flex w-full items-center justify-between rounded-xl border border-dashed p-5 text-left text-sm text-black/45 hover:bg-[#fafafa]"><span>Add restaurants, tickets, tours or anything with a location.</span><Plus size={16} /></button>}
+            {trip.activities.length ? <div className="grid gap-4 sm:grid-cols-2">{trip.activities.map((item) => {
+              const selected = trip.selected.activities.includes(item.id);
+              return <PreviewCard
+                key={item.id}
+                title={item.name}
+                subtitle="Activity"
+                location={item.address ?? 'Location not added'}
+                image={item.image}
+                price={money(item.price_total, trip.trip.currency)}
+                selected={selected}
+                placeholder={<Sparkles />}
+                details={[
+                  { icon: <CalendarDays />, label: item.date ? shortDate(item.date) : 'Date not set' },
+                  { icon: <Clock3 />, label: item.time ?? 'Time not set' },
+                ]}
+                onSelect={() => toggleActivity(item.id, !selected)}
+                actions={item.url ? <External item={item.url} label="Activity listing" /> : undefined}
+              />;
+            })}</div> : <button onClick={() => { setDraft(emptyDraft); setAddKind('activity'); }} className="flex w-full items-center justify-between rounded-xl border border-dashed p-5 text-left text-sm text-black/45 hover:bg-[#fafafa]"><span>Add restaurants, tickets, tours or anything with a location.</span><Plus size={16} /></button>}
           </Section>
 
           <button onClick={() => setView('source')} className="flex w-full items-center justify-between rounded-xl bg-[#f4f4f4] p-4 text-left"><span><strong className="block text-sm">Portable trip source</strong><small className="mt-1 block text-black/45">Edit, download or ask a coding agent to generate roamwise/v1 YAML.</small></span><Code2 size={18} /></button>
@@ -218,6 +252,31 @@ function FlightGroup({ title, items, selected, currency, onSelect, onAdd }: { ti
 }
 function SelectDot({ selected }: { selected: boolean }) { return <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selected ? 'border-black bg-black text-white' : 'text-transparent'}`}><Check size={12} /></span>; }
 function External({ item, label }: { item: string; label: string }) { return <a href={item} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" aria-label={label} className="rounded p-1 text-black/35 hover:bg-black/5 hover:text-black"><ExternalLink size={14} /></a>; }
+
+function PreviewCard({ title, subtitle, location, image, price, selected, placeholder, details, onSelect, actions }: {
+  title: string; subtitle: string; location: string; image?: string; price: string; selected: boolean;
+  placeholder: React.ReactNode; details: { icon: React.ReactNode; label: string }[];
+  onSelect: () => void; actions?: React.ReactNode;
+}) {
+  return <Card className={`group relative gap-0 overflow-hidden rounded-2xl py-0 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${selected ? 'border-black ring-1 ring-black' : 'hover:border-black/25'}`}>
+    <button type="button" aria-pressed={selected} onClick={onSelect} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset">
+      <div className="relative h-48 overflow-hidden bg-[#efefed]">
+        {image ? <img src={image} alt={title} className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105 group-hover:brightness-[0.68]" /> : <div className="grid h-full place-items-center text-black/20 [&_svg]:size-8">{placeholder}</div>}
+        <span className="absolute right-4 top-4 grid size-10 translate-y-1 place-items-center rounded-full bg-white text-black opacity-0 shadow-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100"><ArrowRight size={18} /></span>
+        <span className={`absolute left-4 top-4 grid size-7 place-items-center rounded-full border transition ${selected ? 'border-black bg-black text-white' : 'border-white/80 bg-white/90 text-transparent'}`}><Check size={14} /></span>
+      </div>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0"><h3 className="truncate text-lg font-medium tracking-[-0.02em] transition group-hover:text-black/65">{title}</h3><p className="mt-1 truncate text-sm text-black/45">{subtitle}</p></div>
+          <Badge className="shrink-0 rounded-full bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-black">{price}</Badge>
+        </div>
+        <p className="mt-4 flex items-start gap-1.5 text-xs leading-5 text-black/45"><MapPin className="mt-0.5 size-3.5 shrink-0" /><span className="line-clamp-2">{location}</span></p>
+        <div className="mt-5 grid grid-cols-2 border-t pt-4">{details.map((detail, index) => <div key={`${detail.label}-${index}`} className={`min-w-0 ${index ? 'border-l pl-4' : 'pr-4'}`}><span className="block text-black/55 [&_svg]:size-4">{detail.icon}</span><p className="mt-2 truncate text-xs text-black/60">{detail.label}</p></div>)}</div>
+      </div>
+    </button>
+    {actions && <div className="flex min-h-11 items-center justify-end gap-1 border-t px-5 py-2.5">{actions}</div>}
+  </Card>;
+}
 
 function SourceEditor({ source, setSource, error, onApply, onDownload }: { source: string; setSource: (value: string) => void; error: string; onApply: () => void; onDownload: () => void }) {
   return <div className="mx-auto max-w-3xl"><div className="mb-5 flex items-end justify-between"><div><p className="text-xs font-medium uppercase tracking-[0.14em] text-black/40">Portable source</p><h1 className="mt-2 text-2xl font-semibold">Trip YAML</h1><p className="mt-2 max-w-xl text-sm text-black/50">The visual plan is generated from this file. Edit it here, drop in another <code>.trip.yaml</code>, or give the format to a coding agent.</p></div><Button onClick={onDownload} variant="outline"><Download /> Download</Button></div><Textarea value={source} onChange={(event) => setSource(event.target.value)} spellCheck={false} className="min-h-[65vh] resize-y rounded-xl bg-[#111] p-5 font-mono text-[13px] leading-6 text-[#ededed]" />{error && <p className="mt-3 text-sm text-red-600">{error}</p>}<div className="mt-4 flex items-center justify-between"><a href="/trips/edinburgh.trip.yaml" download className="text-xs text-black/45 underline underline-offset-4">Example file</a><Button onClick={onApply} className="bg-black text-white">Apply YAML</Button></div></div>;
