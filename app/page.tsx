@@ -26,6 +26,25 @@ function shortDate(value: string) { return new Date(`${value}T12:00:00`).toLocal
 function time(value?: string) { return value?.split('T')[1]?.slice(0, 5) ?? '—'; }
 function safeId(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `item-${Date.now()}`; }
 function splitList(value: string) { return value.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean); }
+function flightKey(item: FlightLeg) { return [item.flight_number?.replace(/\s/g, '').toUpperCase(), item.from, item.to, item.depart].join('|'); }
+function mergeFlightOptions(existing: FlightLeg[], incoming: FlightLeg[]) {
+  const liveByKey = new Map(incoming.map((item) => [flightKey(item), item]));
+  const existingKeys = new Set(existing.map(flightKey));
+  return [
+    ...existing.map((item) => {
+      const live = liveByKey.get(flightKey(item));
+      return live ? { ...item, ...live, id: item.id, url: item.url ?? live.url } : item;
+    }),
+    ...incoming.filter((item) => !existingKeys.has(flightKey(item))),
+  ];
+}
+function clearBundledFareClaim(trip: TripDocument) {
+  const wasBundledSeed = trip.flights.updated_at === '2026-09-04T14:00:00Z'
+    && trip.flights.outbound.some((item) => item.id === 'fr188-2026-11-13')
+    && trip.flights.return.some((item) => item.id === 'fr5685-2026-11-16');
+  if (!wasBundledSeed) return trip;
+  return { ...trip, flights: { outbound: trip.flights.outbound.map((item) => ({ ...item, live: false, fare_source: 'Bundled example' })), return: trip.flights.return.map((item) => ({ ...item, live: false, fare_source: 'Bundled example' })) } };
+}
 
 export default function Home() {
   const [trip, setTrip] = useState<TripDocument>(DEFAULT_TRIP);
@@ -50,7 +69,7 @@ export default function Home() {
   useEffect(() => {
     const stored = localStorage.getItem('roamwise-trip-v2');
     let base = DEFAULT_TRIP;
-    if (stored) { try { base = parseTrip(stored); setTrip(base); setSource(stringifyTrip(base)); } catch { /* Keep the bundled example. */ } }
+    if (stored) { try { base = clearBundledFareClaim(parseTrip(stored)); setTrip(base); setSource(stringifyTrip(base)); } catch { /* Keep the bundled example. */ } }
     void refreshStays(base, false);
   }, []);
 
@@ -143,7 +162,7 @@ export default function Home() {
       const origin = trip.trip.origin.code ?? trip.trip.origin.name; const destination = trip.trip.destination.code ?? trip.trip.destination.name;
       const isOutbound = flightDirection === 'outbound';
       const item: FlightLeg = { id, airline: draft.name, flight_number: draft.detail || undefined, price_per_person: Number(draft.price) || 0, url: draft.url || undefined, from: draft.from || (isOutbound ? origin : destination), to: draft.to || (isOutbound ? destination : origin), depart: draft.depart || `${isOutbound ? trip.trip.dates.start : trip.trip.dates.end}T00:00`, arrive: draft.arrive || `${isOutbound ? trip.trip.dates.start : trip.trip.dates.end}T00:00` };
-      if (editingId) commit({ ...trip, flights: { ...trip.flights, [flightDirection]: trip.flights[flightDirection].map((existing) => existing.id === editingId ? { ...existing, ...item, id: editingId, live: false } : existing) } });
+      if (editingId) commit({ ...trip, flights: { ...trip.flights, [flightDirection]: trip.flights[flightDirection].map((existing) => existing.id === editingId ? { ...existing, ...item, id: editingId, live: false, fare_source: undefined, price_updated_at: undefined } : existing) } });
       else commit({ ...trip, flights: { ...trip.flights, [flightDirection]: [...trip.flights[flightDirection], item] }, selected: { ...trip.selected, [isOutbound ? 'outbound_flight' : 'return_flight']: id } });
     }
     setDraft(emptyDraft); setEditingId(null); setAddKind(null);
@@ -189,7 +208,9 @@ export default function Home() {
       const response = await fetch('/api/flights', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ origin, destination, start: trip.trip.dates.start, end: trip.trip.dates.end, currency: trip.trip.currency }) });
       const data = await response.json() as TripDocument['flights'] & { error?: string };
       if (!response.ok) throw new Error(data.error);
-      commit({ ...trip, flights: data, selected: { ...trip.selected, outbound_flight: data.outbound[0]?.id, return_flight: data.return[0]?.id } });
+      const outbound = mergeFlightOptions(trip.flights.outbound, data.outbound);
+      const returns = mergeFlightOptions(trip.flights.return, data.return);
+      commit({ ...trip, flights: { provider: data.provider, updated_at: data.updated_at, outbound, return: returns }, selected: { ...trip.selected, outbound_flight: trip.selected.outbound_flight ?? data.outbound[0]?.id, return_flight: trip.selected.return_flight ?? data.return[0]?.id } });
       setFlightState('done'); setTimeout(() => setFlightState('idle'), 2500);
     } catch { setFlightState('error'); }
   }
@@ -233,7 +254,7 @@ export default function Home() {
             <div className="text-left sm:text-right"><p className="text-3xl font-semibold tracking-[-0.04em]">{money(perPerson, trip.trip.currency)}</p><p className="text-xs text-black/45">per person · {money(total, trip.trip.currency)} total</p></div>
           </div>
 
-          <section><div className="mb-3 flex items-center justify-between"><div><h2 className="flex items-center gap-2 text-base font-semibold"><Plane size={17} />Flights</h2><p className="mt-1 text-xs text-black/40">{trip.flights.provider ? `Live via ${trip.flights.provider}` : 'Trip source'}{trip.flights.updated_at ? ` · checked ${new Date(trip.flights.updated_at).toISOString().slice(11, 16)} UTC` : ''}</p></div><Button onClick={() => void refreshFlights()} disabled={flightState === 'loading'} variant="outline" size="sm">{flightState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Download />} {flightState === 'done' ? 'Updated' : 'Refresh live'}</Button></div>{flightState === 'error' && <p className="mb-3 text-xs text-red-600">No live direct fares were returned. Existing options are unchanged.</p>}<div className="grid gap-4 md:grid-cols-2"><FlightGroup title="Outbound" direction="outbound" items={trip.flights.outbound} selected={trip.selected.outbound_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, outbound_flight: id } })} onEdit={editFlight} onDelete={(item) => setDeleteTarget({ kind: 'flight', id: item.id, name: item.flight_number ?? item.airline, direction: 'outbound' })} onAdd={() => { setEditingId(null); setFlightDirection('outbound'); setDraft(emptyDraft); setAddKind('flight'); }} /><FlightGroup title="Return" direction="return" items={trip.flights.return} selected={trip.selected.return_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, return_flight: id } })} onEdit={editFlight} onDelete={(item) => setDeleteTarget({ kind: 'flight', id: item.id, name: item.flight_number ?? item.airline, direction: 'return' })} onAdd={() => { setEditingId(null); setFlightDirection('return'); setDraft(emptyDraft); setAddKind('flight'); }} /></div></section>
+          <section><div className="mb-3 flex items-center justify-between"><div><h2 className="flex items-center gap-2 text-base font-semibold"><Plane size={17} />Flights</h2><p className="mt-1 text-xs text-black/40">{trip.flights.provider ? `Live basic fares via ${trip.flights.provider}` : 'Add a flight or retrieve live fares'}{trip.flights.updated_at ? ` · checked ${new Date(trip.flights.updated_at).toISOString().slice(11, 16)} UTC` : ''}</p></div><Button onClick={() => void refreshFlights()} disabled={flightState === 'loading'} variant="outline" size="sm">{flightState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Download />} {flightState === 'done' ? 'Updated' : 'Refresh live'}</Button></div>{flightState === 'error' && <p className="mb-3 text-xs text-red-600">No live direct fares were returned. Your existing options are unchanged.</p>}<div className="grid gap-4 md:grid-cols-2"><FlightGroup title="Outbound" direction="outbound" items={trip.flights.outbound} selected={trip.selected.outbound_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, outbound_flight: id } })} onEdit={editFlight} onDelete={(item) => setDeleteTarget({ kind: 'flight', id: item.id, name: item.flight_number ?? item.airline, direction: 'outbound' })} onAdd={() => { setEditingId(null); setFlightDirection('outbound'); setDraft(emptyDraft); setAddKind('flight'); }} /><FlightGroup title="Return" direction="return" items={trip.flights.return} selected={trip.selected.return_flight} currency={trip.trip.currency} onSelect={(id) => commit({ ...trip, selected: { ...trip.selected, return_flight: id } })} onEdit={editFlight} onDelete={(item) => setDeleteTarget({ kind: 'flight', id: item.id, name: item.flight_number ?? item.airline, direction: 'return' })} onAdd={() => { setEditingId(null); setFlightDirection('return'); setDraft(emptyDraft); setAddKind('flight'); }} /></div></section>
 
           <Section title="Stays" icon={<BedDouble size={17} />} action={() => { setEditingId(null); setDraft(emptyDraft); setAddKind('stay'); }}>
             <div className="mb-3 flex gap-2"><Input value={link} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void importListing()} placeholder="Paste an Airbnb or Booking.com link" className="h-10" /><Button onClick={() => void importListing()} disabled={linkState === 'loading'} className="h-10 bg-black text-white"><span className="hidden sm:inline">Import listing</span>{linkState === 'loading' ? <LoaderCircle className="animate-spin" /> : <Link2 />}</Button></div>
@@ -300,7 +321,7 @@ function FlightGroup({ title, direction, items, selected, currency, onSelect, on
     const isSelected = selected === item.id;
     return <div key={item.id} className={`relative overflow-hidden rounded-2xl border bg-[#fbfbf8] transition hover:-translate-y-0.5 hover:shadow-lg ${isSelected ? 'border-black ring-1 ring-black' : 'hover:border-black/25'}`}>
       <button type="button" aria-pressed={isSelected} onClick={() => onSelect(item.id)} className="block w-full p-4 pb-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset">
-        <div className="flex items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-2"><span className="grid size-7 place-items-center rounded-full bg-black text-white"><Plane size={13} /></span><span className="truncate text-sm font-semibold">{item.airline}</span>{item.live && <Badge className="h-5 rounded-full bg-green-50 px-2 text-[10px] text-green-700 hover:bg-green-50">Live</Badge>}</div><span className="font-mono text-[11px] tracking-wider text-black/45">{item.flight_number ?? 'FLIGHT'}</span></div>
+        <div className="flex items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-2"><span className="grid size-7 place-items-center rounded-full bg-black text-white"><Plane size={13} /></span><span className="truncate text-sm font-semibold">{item.airline}</span>{item.live ? <Badge title={item.fare_source} className="h-5 rounded-full bg-green-50 px-2 text-[10px] text-green-700 hover:bg-green-50">Live fare</Badge> : <Badge variant="secondary" className="h-5 rounded-full px-2 text-[10px]">Manual</Badge>}</div><span className="font-mono text-[11px] tracking-wider text-black/45">{item.flight_number ?? 'FLIGHT'}</span></div>
         <div className="mt-5 grid grid-cols-[auto_1fr_auto] items-center gap-3"><div><p className="text-2xl font-semibold tracking-[-0.04em]">{item.from}</p><p className="mt-0.5 text-xs text-black/45">{time(item.depart)}</p></div><div className="flex items-center"><span className="h-px flex-1 border-t border-dashed border-black/25" /><Plane className="mx-2 size-4 rotate-90 text-black/45" /><span className="h-px flex-1 border-t border-dashed border-black/25" /></div><div className="text-right"><p className="text-2xl font-semibold tracking-[-0.04em]">{item.to}</p><p className="mt-0.5 text-xs text-black/45">{time(item.arrive)}</p></div></div>
         <div className="mt-4 flex items-center justify-between text-[11px] text-black/40"><span>{shortDate(item.depart.slice(0, 10))}</span><span>{direction === 'outbound' ? 'Outbound' : 'Return'} · per person</span></div>
       </button>

@@ -12,6 +12,8 @@ export type FlightLeg = {
   price_per_person: number;
   url?: string;
   live?: boolean;
+  fare_source?: string;
+  price_updated_at?: string;
 };
 export type Stay = {
   id: string; name: string; type?: string; address?: string; coordinates?: Coordinates;
@@ -47,9 +49,8 @@ export const DEFAULT_TRIP: TripDocument = {
     destination: { name: 'Edinburgh', code: 'EDI', coordinates: { lat: 55.95, lng: -3.3725 } },
   },
   flights: {
-    provider: 'Ryanair', updated_at: '2026-09-04T14:00:00Z',
-    outbound: [{ id: 'fr188-2026-11-13', airline: 'Ryanair', flight_number: 'FR188', from: 'MAD', to: 'EDI', depart: '2026-11-13T10:20:00', arrive: '2026-11-13T12:15:00', price_per_person: 27.99, live: true }],
-    return: [{ id: 'fr5685-2026-11-16', airline: 'Ryanair', flight_number: 'FR5685', from: 'EDI', to: 'MAD', depart: '2026-11-16T19:45:00', arrive: '2026-11-16T23:40:00', price_per_person: 27.99, live: true }],
+    outbound: [],
+    return: [],
   },
   stays: [
     { id: 'dryden', name: 'Dryden Gardens', type: 'Private double room', address: 'Broughton, Edinburgh', coordinates: { lat: 55.97, lng: -3.185 }, price_total: 274, rating: '9.2', url: 'https://www.booking.com/hotel/gb/dryden-gardens.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1', image: '/stays/dryden.jpg' },
@@ -58,7 +59,7 @@ export const DEFAULT_TRIP: TripDocument = {
     { id: 'suite', name: 'Suite 3 En-suite', type: 'Private en-suite double', address: 'Central Edinburgh', coordinates: { lat: 55.953, lng: -3.188 }, price_total: 344, rating: '9.0', url: 'https://www.booking.com/searchresults.html?ss=Suite%203%20En-suite%20Room%20Edinburgh', image: '/stays/suite.jpg' },
   ],
   activities: [],
-  selected: { outbound_flight: 'fr188-2026-11-13', return_flight: 'fr5685-2026-11-16', stay: 'dryden', activities: [] },
+  selected: { stay: 'dryden', activities: [] },
 };
 
 type LegacyTrip = Record<string, any>;
