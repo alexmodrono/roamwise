@@ -58,14 +58,17 @@ export function TripMap({ trip, compact = false }: { trip: TripDocument; compact
       const mapkit = (window as unknown as { mapkit?: any }).mapkit;
       if (!mapkit || disposed || !mapRef.current) return;
       try {
-        await mapkit.init({ authorizationCallback: (done: (token: string) => void) => done(appleToken), language: 'en' });
-        if (!mapkit.Map || !mapkit.MarkerAnnotation || !mapkit.PolylineOverlay) throw new Error('Required MapKit libraries did not load');
-        const map = new mapkit.Map(mapRef.current, { showsZoomControl: !compact, showsMapTypeControl: !compact });
+        const libraries = ['map', 'annotations', 'overlays'];
+        await mapkit.init({ authorizationCallback: (done: (token: string) => void) => done(appleToken), language: 'en', libraries });
+        const loaded = typeof mapkit.load === 'function' ? await mapkit.load(libraries) : mapkit;
+        const api = loaded ?? mapkit;
+        if (!api.Map || !api.MarkerAnnotation || !api.PolylineOverlay) throw new Error('Required MapKit libraries did not load');
+        const map = new api.Map(mapRef.current, { showsZoomControl: !compact, showsMapTypeControl: !compact });
         appleMap = map;
         const items: any[] = [];
         points.forEach((point) => {
-          const coordinate = new mapkit.Coordinate(point.coordinates.lat, point.coordinates.lng);
-          const annotation = new mapkit.MarkerAnnotation(coordinate, {
+          const coordinate = new api.Coordinate(point.coordinates.lat, point.coordinates.lng);
+          const annotation = new api.MarkerAnnotation(coordinate, {
             title: point.label,
             color: point.kind === 'airport' ? '#171717' : point.kind === 'stay' ? '#2563eb' : '#d97706',
             glyphText: point.kind === 'airport' ? '✈' : point.kind === 'stay' ? '●' : '•',
@@ -75,10 +78,10 @@ export function TripMap({ trip, compact = false }: { trip: TripDocument; compact
         const origin = trip.trip.origin.coordinates;
         const destination = trip.trip.destination.coordinates;
         if (origin && destination) {
-          const overlay = new mapkit.PolylineOverlay([new mapkit.Coordinate(origin.lat, origin.lng), new mapkit.Coordinate(destination.lat, destination.lng)], { style: new mapkit.Style({ strokeColor: '#171717', lineWidth: 2, lineDash: [7, 7] }) });
+          const overlay = new api.PolylineOverlay([new api.Coordinate(origin.lat, origin.lng), new api.Coordinate(destination.lat, destination.lng)], { style: new api.Style({ strokeColor: '#171717', lineWidth: 2, lineDash: [7, 7] }) });
           map.addOverlay(overlay); items.push(overlay);
         }
-        if (items.length) map.showItems(items, { animate: true, padding: new mapkit.Padding(50, 50, 50, 50) });
+        if (items.length) map.showItems(items, { animate: true, padding: new api.Padding(50, 50, 50, 50) });
       } catch (error) { setMapError(`Apple Maps could not start: ${error instanceof Error ? error.message : 'check the token and allowed domain'}`); }
     };
     const existing = document.querySelector<HTMLScriptElement>('script[data-roamwise-mapkit]');
