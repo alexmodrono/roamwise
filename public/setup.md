@@ -4,15 +4,15 @@ Roamwise opens `*-trip.yaml` files in a live, read-only browser preview. Your ag
 
 ## Add the Roamwise skill
 
-The intended public installation uses the Skills CLI. Replace `OWNER/REPOSITORY` with Roamwise's public GitHub repository:
+The intended public installation uses the Skills CLI and the planned `alexmodrono/roamwise` repository:
 
 ```sh
-npx skills add OWNER/REPOSITORY --skill roamwise -g
+npx skills add alexmodrono/roamwise --skill roamwise -g
 ```
 
 Choose your agent in the installer, or add `-a codex`, `-a claude-code`, or `-a cursor`. Omit `-g` for a project-local installation. Skills uses `add`, not `install`; a bare `roamwise` name is not the repository source. Update with `npx skills update roamwise -g`.
 
-**Release status:** the public GitHub repository has not been configured in this checkout, and `@roamwise/cli@0.1.0` has not yet been published by this project. The command above is a release template, not a working public installation link yet.
+**Release status:** the planned `alexmodrono/roamwise` GitHub repository has not been created yet, and `@roamwise/cli@0.1.0` has not yet been published by this project. The command above is a release template, not a working public installation link yet.
 
 From a source checkout, the skill can already be installed with:
 

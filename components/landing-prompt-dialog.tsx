@@ -20,15 +20,15 @@ export function LandingPromptDialog({ kind, hero = false }: { kind: 'trip' | 'ag
       if (agent) {
         setPrompt(`You are a coding agent setting up Roamwise as a trip-planning companion. Install the Roamwise skill first using the Skills CLI.
 
-1. Find the Roamwise repository source provided by the user or configured in the current checkout. From a Roamwise source checkout, run:
+1. Install the skill from the official repository:
+
+   npx skills add alexmodrono/roamwise --skill roamwise -y
+
+   Install into the current project, using the installer's agent selection if needed. The repository is planned but has not been created yet. If it is unavailable and you are in a Roamwise source checkout, use:
 
    npx skills add ./skills/roamwise --skill roamwise -y
 
-   Otherwise, use the confirmed public GitHub repository URL:
-
-   npx skills add <ROAMWISE_REPOSITORY_URL> --skill roamwise -y
-
-   Replace the placeholder before running the command. If no repository source is available, ask the user for it; do not guess the repository or package name. Install into the current project, using the installer's agent selection if needed.
+   Otherwise, report that the repository is not available yet. Do not substitute a different repository or package.
 
 2. Read the installed roamwise SKILL.md and follow its instructions. Let the skill handle runtime installation, trip creation, validation, preview startup, and subsequent updates. Do not duplicate that workflow or install the Roamwise CLI globally.
 

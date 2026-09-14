@@ -6,10 +6,10 @@ Open portable YAML trip plans in a live local browser preview. Node.js 22.13+.
 npx --yes --package=@roamwise/cli@0.1.0 roamwise validate seville-trip.yaml --json
 npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml
 npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml --print-url --json
-npx skills add OWNER/REPOSITORY --skill roamwise -g
+npx skills add alexmodrono/roamwise --skill roamwise -g
 ```
 
-After publication, replace `OWNER/REPOSITORY` with the public Roamwise repository. The repository and npm release are not yet published by this checkout. Skills installs the instructions; the agent runs the pinned runtime through `npx`, with no global CLI installation. Use `-a codex`, `-a claude-code`, or `-a cursor` to target an agent. The legacy `roamwise install-skill` command remains for compatibility.
+The planned GitHub repository is `alexmodrono/roamwise`. The repository and npm release are not yet published by this checkout. Skills installs the instructions; the agent runs the pinned runtime through `npx`, with no global CLI installation. Use `-a codex`, `-a claude-code`, or `-a cursor` to target an agent. The legacy `roamwise install-skill` command remains for compatibility.
 
 For an unpublished release tarball, use `npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json`.
 

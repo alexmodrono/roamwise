@@ -105,7 +105,7 @@ See [performance and distribution notes](docs/performance.md) for measurements, 
 
 ### Skill-first public installation
 
-The preferred release flow is `npx skills add OWNER/REPOSITORY --skill roamwise -g`, followed by asking the agent to plan a trip. `OWNER/REPOSITORY` is a placeholder until the public GitHub repository is configured. The skill invokes `npx --yes --package=@roamwise/cli@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. The legacy installer remains available for compatibility. See [setup instructions](public/setup.md) for local and tarball workflows.
+The preferred release flow is `npx skills add alexmodrono/roamwise --skill roamwise -g`, followed by asking the agent to plan a trip. `alexmodrono/roamwise` is the planned GitHub repository; it has not been created yet. The skill invokes `npx --yes --package=@roamwise/cli@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. The legacy installer remains available for compatibility. See [setup instructions](public/setup.md) for local and tarball workflows.
 
 ### Public landing and planner
 
