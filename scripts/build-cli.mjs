@@ -23,3 +23,7 @@ await cp(resolve(root, 'public/maps'), resolve(dist, 'viewer/maps'), { recursive
 await cp(resolve(root, 'skills/roamwise'), resolve(dist, 'skill'), { recursive: true });
 await cp(resolve(root, 'LICENSE'), resolve(root, 'packages/cli/LICENSE'));
 await chmod(resolve(dist, 'cli.mjs'), 0o755);
+
+await cp(resolve(root, 'public/roamwise.svg'), resolve(dist, 'viewer/roamwise.svg'));
+
+await cp(resolve(root, 'public/trips/seville.trip.yaml'), resolve(dist, 'viewer/trips/seville.trip.yaml'));

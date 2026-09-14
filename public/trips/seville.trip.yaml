@@ -1,0 +1,430 @@
+# Complete product demo. Flights, stays, ratings, prices and schedules are illustrative.
+# Accommodation photographs are generic inspiration, not property photographs.
+schema: roamwise/v2
+trip:
+  title: Seville, Spain · the complete Roamwise demo
+  dates:
+    start: 2027-04-09
+    end: 2027-04-12
+  travellers: 2
+  currency: EUR
+  budget_per_person: 650
+  origin:
+    name: Madrid
+    code: MAD
+    coordinates:
+      lat: 40.4168
+      lng: -3.7038
+  destination:
+    name: Seville, Spain
+    code: SVQ
+    coordinates:
+      lat: 37.3891
+      lng: -5.9845
+flights:
+  provider: Illustrative demo options · not live fares
+  outbound:
+    - id: demo101
+      airline: Demo Airways · fictional
+      flight_number: DEMO101
+      from: MAD
+      to: SVQ
+      depart: 2027-04-09T09:30:00+02:00
+      arrive: 2027-04-09T10:40:00+02:00
+      price_per_person: 65
+      live: false
+      fare_source: Illustrative demo fare and schedule. Not a bookable flight.
+        Research real flights before travelling.
+    - id: demo103
+      airline: Demo Airways · fictional
+      flight_number: DEMO103
+      from: MAD
+      to: SVQ
+      depart: 2027-04-09T13:00:00+02:00
+      arrive: 2027-04-09T14:10:00+02:00
+      price_per_person: 49
+      live: false
+      fare_source: Illustrative demo fare and schedule. Not a bookable flight.
+        Research real flights before travelling.
+  return:
+    - id: demo202
+      airline: Demo Airways · fictional
+      flight_number: DEMO202
+      from: SVQ
+      to: MAD
+      depart: 2027-04-12T17:00:00+02:00
+      arrive: 2027-04-12T18:10:00+02:00
+      price_per_person: 72
+      live: false
+      fare_source: Illustrative demo fare and schedule. Not a bookable flight.
+        Research real flights before travelling.
+    - id: demo204
+      airline: Demo Airways · fictional
+      flight_number: DEMO204
+      from: SVQ
+      to: MAD
+      depart: 2027-04-12T20:30:00+02:00
+      arrive: 2027-04-12T21:40:00+02:00
+      price_per_person: 58
+      live: false
+      fare_source: Illustrative demo fare and schedule. Not a bookable flight.
+        Research real flights before travelling.
+stays:
+  - id: courtyard
+    name: Santa Cruz courtyard hideaway · demo
+    type: Boutique hotel room
+    address: Santa Cruz, Seville, Spain · approximate neighbourhood pin
+    coordinates:
+      lat: 37.385
+      lng: -5.988
+    price_total: 420
+    rating: 4.8/5 · illustrative
+    image: https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80
+    images:
+      - https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80
+    neighbourhood: Santa Cruz
+    bedrooms: 1
+    bathrooms: 1
+    size_m2: 22
+    amenities:
+      - Wi-Fi
+      - Air conditioning
+      - Breakfast option
+      - Luggage storage
+    pros:
+      - Central base
+      - Easy walks to sights
+      - Simple check-in
+    cons:
+      - Less living space
+      - Street noise possible
+    check_in: 15:00 on 9 April 2027
+    check_out: 11:00 on 12 April 2027
+    cancellation_policy: Illustrative flexible option. Confirm the actual terms before booking.
+    notes: Fictional accommodation created to demonstrate comparison, galleries,
+      amenities and selection. Prices cover three nights for two. Photos are
+      generic inspiration, not images of a real property. The map pin marks the
+      neighbourhood, not an address.
+  - id: loft
+    name: Triana riverside loft · demo
+    type: Entire apartment
+    address: Triana, Seville, Spain · approximate neighbourhood pin
+    coordinates:
+      lat: 37.383
+      lng: -6.004
+    price_total: 345
+    rating: 4.6/5 · illustrative
+    image: https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80
+    images:
+      - https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80
+    neighbourhood: Triana
+    bedrooms: 1
+    bathrooms: 1
+    size_m2: 48
+    amenities:
+      - Kitchen
+      - Wi-Fi
+      - Air conditioning
+      - Washing machine
+    pros:
+      - More space
+      - Kitchen for relaxed breakfasts
+      - Lowest demo price
+    cons:
+      - Longer walk to the palace
+      - No breakfast service
+    check_in: 15:00 on 9 April 2027
+    check_out: 11:00 on 12 April 2027
+    cancellation_policy: Illustrative flexible option. Confirm the actual terms before booking.
+    notes: Fictional accommodation created to demonstrate comparison, galleries,
+      amenities and selection. Prices cover three nights for two. Photos are
+      generic inspiration, not images of a real property. The map pin marks the
+      neighbourhood, not an address.
+  - id: rooftop
+    name: City-centre rooftop retreat · demo
+    type: Boutique hotel room
+    address: City centre, Seville, Spain · approximate neighbourhood pin
+    coordinates:
+      lat: 37.393
+      lng: -5.993
+    price_total: 585
+    rating: 4.9/5 · illustrative
+    image: https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80
+    images:
+      - https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80
+      - https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80
+    neighbourhood: City centre
+    bedrooms: 1
+    bathrooms: 1
+    size_m2: 32
+    amenities:
+      - Wi-Fi
+      - Air conditioning
+      - Breakfast option
+      - Luggage storage
+    pros:
+      - Central base
+      - Easy walks to sights
+      - Simple check-in
+    cons:
+      - Less living space
+      - Street noise possible
+    check_in: 15:00 on 9 April 2027
+    check_out: 11:00 on 12 April 2027
+    cancellation_policy: Illustrative flexible option. Confirm the actual terms before booking.
+    notes: Fictional accommodation created to demonstrate comparison, galleries,
+      amenities and selection. Prices cover three nights for two. Photos are
+      generic inspiration, not images of a real property. The map pin marks the
+      neighbourhood, not an address.
+activities:
+  - id: airport-in
+    name: Airport transfer to the city
+    category: transport
+    coordinates:
+      lat: 37.418
+      lng: -5.893
+    notes: Demo transfer allowance for two. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-09
+    time: 11:15
+    end_time: 12:00
+    price_total: 12
+  - id: welcome-lunch
+    name: A first taste of Seville
+    category: food
+    coordinates:
+      lat: 37.386
+      lng: -5.991
+    notes: Demo lunch budget for two; choose a restaurant with your assistant. All
+      times and budgets are illustrative; confirm access, schedules and prices
+      before travelling.
+    date: 2027-04-09
+    time: 12:30
+    end_time: 13:30
+    price_total: 40
+  - id: santa-cruz
+    name: Wander the lanes of Santa Cruz
+    category: outdoor
+    coordinates:
+      lat: 37.385
+      lng: -5.989
+    notes: Self-guided neighbourhood walk. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-09
+    time: 16:00
+    end_time: 17:30
+    price_total: 0
+  - id: river-sunset
+    name: Golden hour beside the Guadalquivir
+    category: outdoor
+    coordinates:
+      lat: 37.3824
+      lng: -5.9963
+    notes: A relaxed riverside walk; the time is not a sunset forecast. All times
+      and budgets are illustrative; confirm access, schedules and prices before
+      travelling.
+    date: 2027-04-09
+    time: 18:30
+    end_time: 19:30
+    price_total: 0
+  - id: tapas-night
+    name: Tapas and an unhurried evening
+    category: food
+    coordinates:
+      lat: 37.386
+      lng: -5.995
+    notes: Demo dinner allowance for two. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-09
+    time: 20:00
+    end_time: 21:30
+    price_total: 55
+  - id: palace
+    name: "Real Alcázar: courtyards and gardens"
+    category: sight
+    coordinates:
+      lat: 37.3831
+      lng: -5.9902
+    notes: Demo admission allowance for two. Reserve a suitable entry slot using the
+      official website. All times and budgets are illustrative; confirm access,
+      schedules and prices before travelling.
+    date: 2027-04-10
+    time: 09:30
+    end_time: 11:30
+    price_total: 40
+    url: https://alcazarsevilla.org/prepara-la-visita/
+  - id: cathedral
+    name: Cathedral and Giralda visit
+    category: sight
+    coordinates:
+      lat: 37.3858
+      lng: -5.9931
+    notes: Demo admission allowance for two. Choose a time that fits the palace
+      visit. All times and budgets are illustrative; confirm access, schedules
+      and prices before travelling.
+    date: 2027-04-10
+    time: 12:00
+    end_time: 13:15
+    price_total: 30
+  - id: lunch-break
+    name: A long lunch and a little downtime
+    category: food
+    coordinates:
+      lat: 37.386
+      lng: -5.99
+    notes: Keep this break flexible. Demo meal budget for two. All times and budgets
+      are illustrative; confirm access, schedules and prices before travelling.
+    date: 2027-04-10
+    time: 13:30
+    end_time: 15:00
+    price_total: 45
+  - id: plaza-espana
+    name: Plaza de España and María Luisa Park
+    category: outdoor
+    coordinates:
+      lat: 37.3772
+      lng: -5.9869
+    notes: Self-guided outdoor exploration. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-10
+    time: 16:00
+    end_time: 18:00
+    price_total: 0
+    url: https://www.spain.info/en/places-of-interest/plaza-espana-sevilla/
+  - id: flamenco
+    name: An evening of flamenco
+    category: seasonal
+    coordinates:
+      lat: 37.383
+      lng: -6.001
+    notes: Demo allowance for two. This is a neighbourhood placeholder, not a
+      confirmed venue or show. All times and budgets are illustrative; confirm
+      access, schedules and prices before travelling.
+    date: 2027-04-10
+    time: 20:00
+    end_time: 21:15
+    price_total: 60
+  - id: triana
+    name: Cross the bridge into Triana
+    category: outdoor
+    coordinates:
+      lat: 37.3855
+      lng: -6.003
+    notes: Walk and explore at your own pace. All times and budgets are
+      illustrative; confirm access, schedules and prices before travelling.
+    date: 2027-04-11
+    time: 09:30
+    end_time: 10:30
+    price_total: 0
+    url: https://visitasevilla.es/en/barrio-de-triana-y-los-remedios/
+  - id: market
+    name: Market browsing and breakfast
+    category: food
+    coordinates:
+      lat: 37.3854
+      lng: -6.0036
+    notes: Demo food budget for two. Check which stalls are open. All times and
+      budgets are illustrative; confirm access, schedules and prices before
+      travelling.
+    date: 2027-04-11
+    time: 10:30
+    end_time: 11:30
+    price_total: 24
+  - id: ceramics
+    name: Find a ceramic souvenir
+    category: shopping
+    coordinates:
+      lat: 37.384
+      lng: -6.005
+    notes: Optional shopping stop. Unknown price intentionally demonstrates
+      incomplete budgets. All times and budgets are illustrative; confirm
+      access, schedules and prices before travelling.
+    date: 2027-04-11
+    time: 12:00
+    end_time: 13:00
+    cost_label: Price to confirm
+  - id: last-dinner
+    name: One last dinner together
+    category: food
+    coordinates:
+      lat: 37.39
+      lng: -5.994
+    notes: Demo dinner allowance for two. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-11
+    time: 19:30
+    end_time: 21:00
+    price_total: 60
+  - id: coffee
+    name: Coffee, packing and a final stroll
+    category: food
+    coordinates:
+      lat: 37.386
+      lng: -5.991
+    notes: Demo breakfast allowance for two. All times and budgets are illustrative;
+      confirm access, schedules and prices before travelling.
+    date: 2027-04-12
+    time: 09:00
+    end_time: 10:00
+    price_total: 16
+  - id: airport-out
+    name: Leave for the airport
+    category: transport
+    coordinates:
+      lat: 37.418
+      lng: -5.893
+    notes: Demo transfer budget for two. Allow additional time if your actual flight
+      requires it. All times and budgets are illustrative; confirm access,
+      schedules and prices before travelling.
+    date: 2027-04-12
+    time: 14:00
+    end_time: 15:00
+    price_total: 12
+  - id: bike-option
+    name: "Alternative: a riverside bike ride"
+    category: outdoor
+    coordinates:
+      lat: 37.379
+      lng: -5.998
+    notes: Unselected alternative to the shopping stop. Demo rental budget for two.
+      All times and budgets are illustrative; confirm access, schedules and
+      prices before travelling.
+    date: 2027-04-11
+    time: 12:00
+    end_time: 14:00
+    price_total: 36
+  - id: cooking-option
+    name: "Idea: learn to cook Andalusian dishes"
+    category: food
+    coordinates:
+      lat: 37.388
+      lng: -5.996
+    notes: Unscheduled idea. Find a provider, price and available time with your
+      assistant. All times and budgets are illustrative; confirm access,
+      schedules and prices before travelling.
+    cost_label: Price to confirm
+selected:
+  outbound_flight: demo101
+  return_flight: demo202
+  stay: courtyard
+  activities:
+    - airport-in
+    - welcome-lunch
+    - santa-cruz
+    - river-sunset
+    - tapas-night
+    - palace
+    - cathedral
+    - lunch-break
+    - plaza-espana
+    - flamenco
+    - triana
+    - market
+    - last-dinner
+    - coffee
+    - airport-out
