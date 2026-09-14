@@ -1,15 +1,15 @@
+@import "./fonts-ui.css";
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import 'leaflet/dist/leaflet.css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ui);
+  --font-mono: ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,10 +50,12 @@
 }
 
 body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-ui), Arial, Helvetica, sans-serif;
 }
 
 :root {
+  --font-ui: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
   --background: #ffffff;
   --foreground: #171717;
   --card: oklch(1 0 0);
@@ -134,16 +136,37 @@ body {
   }
 }
 
-.leaflet-container {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+.maplibregl-map {
+  font-family: var(--font-ui), Arial, Helvetica, sans-serif;
   background: #e9e9e9;
 }
 
+@page { size: A4 portrait; margin: 0; }
+
 @media print {
-  @page { size: A4 portrait; margin: 0; }
   body { background: white !important; }
   .final-mode > :not(.final-overlay) { display: none !important; }
   .no-print { display: none !important; }
-  .print-sheet { width: 210mm !important; min-height: 297mm; break-after: page; }
-  .leaflet-control-container { display: none !important; }
+  .print-sheet { width: auto !important; min-height: 297mm; margin: 0 !important; break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .print-costs { break-before: page; break-inside: avoid; min-height: 297mm; box-sizing: border-box; }
+  .print-day { break-inside: avoid; padding-top: 28px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .print-event { break-inside: avoid; }
+  .print-plan-heading { break-after: avoid; }
+  .maplibregl-ctrl-top-right { display: none !important; }
+  .print-sheet a { color: inherit; text-decoration: none; }
+}
+
+/* Planning controls share a clear keyboard focus and comfortable touch targets. */
+.planner-ui :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+.planner-section { scroll-margin-top: 8rem; }
+.planner-ui button:disabled { cursor: default; }
+@media (prefers-reduced-motion: reduce) {
+  .planner-ui *, .planner-ui *::before, .planner-ui *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

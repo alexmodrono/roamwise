@@ -1,0 +1,21 @@
+schema: roamwise/v2
+trip:
+  title: A weekend in Edinburgh
+  dates: { start: '2026-11-13', end: '2026-11-16' }
+  travellers: 2
+  currency: GBP
+  origin: { name: Madrid, code: MAD }
+  destination:
+    name: Edinburgh
+    code: EDI
+    coordinates: { lat: 55.9533, lng: -3.1883 }
+activities:
+  - id: royal-mile
+    name: Walk the Royal Mile
+    date: '2026-11-14'
+    time: '10:00'
+    end_time: '11:30'
+    coordinates: { lat: 55.9508, lng: -3.1854 }
+    price_total: 0
+selected:
+  activities: [royal-mile]

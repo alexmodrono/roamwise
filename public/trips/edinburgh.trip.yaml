@@ -1,21 +1,752 @@
 schema: roamwise/v2
 trip:
-  title: Edinburgh weekend
-  dates: { start: 2026-11-13, end: 2026-11-16 }
+  title: Fin de semana largo en Edimburgo · apertura de Navidad
+  dates: { start: '2026-11-13', end: '2026-11-16' }
   travellers: 2
   currency: EUR
   budget_per_person: 300
   origin: { name: Madrid, code: MAD, coordinates: { lat: 40.4983, lng: -3.5676 } }
-  destination: { name: Edinburgh, code: EDI, coordinates: { lat: 55.95, lng: -3.3725 } }
+  destination: { name: Edimburgo, code: EDI, coordinates: { lat: 55.9533, lng: -3.1883 } }
+
 flights:
-  outbound: []
-  return: []
+  provider: Página oficial de reservas de Ryanair
+  updated_at: '2026-09-04T23:02:13Z'
+  outbound:
+    - id: fr188-out
+      airline: Ryanair
+      flight_number: FR188
+      from: MAD
+      to: EDI
+      depart: '2026-11-13T10:20:00+01:00'
+      arrive: '2026-11-13T12:15:00+00:00'
+      price_per_person: 40.42
+      live: true
+      fare_source: Tarifa Basic de Ryanair · solo artículo personal
+      price_updated_at: '2026-09-04T23:02:13Z'
+      url: "https://www.ryanair.com/es/es/trip/flights/select?adults=2&teens=0&children=0&infants=0&dateOut=2026-11-13&dateIn=2026-11-16&isConnectedFlight=false&originIata=MAD&destinationIata=EDI&tpAdults=2&tpStartDate=2026-11-13&tpEndDate=2026-11-16&tpOriginIata=MAD&tpDestinationIata=EDI"
+  return:
+    - id: fr5685-return
+      airline: Ryanair
+      flight_number: FR5685
+      from: EDI
+      to: MAD
+      depart: '2026-11-16T19:45:00+00:00'
+      arrive: '2026-11-16T23:40:00+01:00'
+      price_per_person: 27.99
+      live: true
+      fare_source: Tarifa Basic de Ryanair · solo artículo personal
+      price_updated_at: '2026-09-04T23:02:13Z'
+      url: "https://www.ryanair.com/es/es/trip/flights/select?adults=2&teens=0&children=0&infants=0&dateOut=2026-11-13&dateIn=2026-11-16&isConnectedFlight=false&originIata=MAD&destinationIata=EDI&tpAdults=2&tpStartDate=2026-11-13&tpEndDate=2026-11-16&tpOriginIata=MAD&tpDestinationIata=EDI"
+    - id: fr189-return
+      airline: Ryanair
+      flight_number: FR189
+      from: EDI
+      to: MAD
+      depart: '2026-11-16T10:00:00+00:00'
+      arrive: '2026-11-16T13:55:00+01:00'
+      price_per_person: 40.27
+      live: true
+      fare_source: Tarifa Basic de Ryanair · alternativa de vuelta por la mañana
+      price_updated_at: '2026-09-04T23:02:13Z'
+      url: "https://www.ryanair.com/es/es/trip/flights/select?adults=2&teens=0&children=0&infants=0&dateOut=2026-11-13&dateIn=2026-11-16&isConnectedFlight=false&originIata=MAD&destinationIata=EDI&tpAdults=2&tpStartDate=2026-11-13&tpEndDate=2026-11-16&tpOriginIata=MAD&tpDestinationIata=EDI"
+
 stays:
-  - { id: dryden, name: Dryden Gardens, type: Private double room, address: "Broughton, Edinburgh", coordinates: { lat: 55.97, lng: -3.185 }, price_total: 274, rating: "9.2", image: /stays/dryden.jpg }
-  - { id: lavender, name: Lavender Guest House, type: Double room · en-suite, address: South Edinburgh, coordinates: { lat: 55.935, lng: -3.177 }, price_total: 310, rating: "8.9", image: /stays/lavender.jpg }
-  - { id: moon, name: Moon suite apart, type: Entire 1-bed apartment · 47 m², address: "Grange, Edinburgh", coordinates: { lat: 55.936, lng: -3.19 }, price_total: 324, rating: New, image: /stays/moon.jpg }
-  - { id: suite, name: Suite 3 En-suite, type: Private en-suite double, address: Central Edinburgh, coordinates: { lat: 55.953, lng: -3.188 }, price_total: 344, rating: "9.0", image: /stays/suite.jpg }
-activities: []
+  - id: split-lavender-airbnb
+    name: Plan dividido · Lavender + Airbnb reservado
+    type: Habitación privada 13–14 nov. · apartamento completo 14–16 nov.
+    neighbourhood: Sur de Edimburgo el viernes · Fountainbridge desde el sábado
+    address: "13 nov.: 126 Old Dalkeith Road, EH16 4SD · 14–16 nov.: 171 Gilmore Place, Edinburgh EH3 9PL"
+    coordinates: { lat: 55.9392015, lng: -3.212827 }
+    price_total: 479.86
+    rating: 8,9 en Lavender · 4,84/5 en Airbnb
+    url: "https://www.airbnb.com/rooms/1421190950146147631"
+    image: /stays/airbnb-gilmore-1.jpg
+    images:
+      - /stays/lavender-1.jpg
+      - /stays/airbnb-gilmore-2.jpg
+      - /stays/airbnb-gilmore-3.jpg
+    notes: >-
+      Opción seleccionada para reflejar correctamente las tres noches: una noche candidata
+      en Lavender por 110 € según el precio consultado para el 13–14 de noviembre, más la
+      reserva confirmada de Airbnb de 369,86 € para el 14–16. Lavender todavía no está
+      reservado y su tarifa debe volver a comprobarse antes de pagar.
+    amenities: [Baño privado las tres noches, Apartamento completo desde el sábado, Cocina completa en Airbnb, Lavadora, Wifi, Autoentrada con caja de llaves]
+    pros: [Conserva la buena reserva de Airbnb, Ubicación muy práctica desde el sábado, Coste total cercano al presupuesto]
+    cons: [Hay que reservar la noche del viernes, Cambio de alojamiento el sábado, "8,34 € por persona sobre el objetivo de vuelos y alojamiento"]
+    check_in: '17:30 · Lavender (13 nov.); 15:00 · Airbnb (14 nov.)'
+    check_out: '09:00 prevista · límite del Airbnb 11:00 (16 nov.)'
+    cancellation_policy: Airbnb permite cancelar gratis hasta las 15:00 del 13 de noviembre; comprobar por separado la política de la noche en Lavender
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: balerno-private-suite
+    name: Suite privada en Balerno · mejor opción económica
+    type: Suite de invitados completa · dormitorio y baño privados
+    neighbourhood: Balerno · suroeste de Edimburgo
+    address: Balerno, Edinburgh EH14, Escocia (Reino Unido) · Airbnb muestra la dirección exacta después de reservar
+    coordinates: { lat: 55.88024, lng: -3.34273 }
+    price_total: 292
+    rating: 4,94/5 · 392 reseñas · Favorito entre huéspedes · Superhost
+    url: "https://www.airbnb.com/rooms/24703715?adults=2&check_in=2026-11-13&check_out=2026-11-16"
+    image: /stays/balerno-suite-1.jpg
+    images:
+      - /stays/balerno-suite-2.jpg
+      - /stays/balerno-suite-3.jpg
+    notes: >-
+      Precio total mostrado para dos personas y las tres noches del 13 al 16 de noviembre,
+      consultado el 5 de septiembre de 2026. Suite independiente sin espacios interiores
+      compartidos: salón-cocina, dormitorio doble y cuarto de ducha. La parada está a unos
+      3 minutos andando y el autobús 44 tarda aproximadamente 45 minutos hasta el centro.
+      Número de registro indicado por el anuncio: EH-76969-F. Transporte: el 44 es una línea
+      urbana de Lothian Buses, así que se paga la tarifa plana de 2,40 £ por trayecto, el
+      TapTapCap tope de 5,70 £ al día y el Ridacard semanal (23 £ estudiante con carné de una
+      universidad de Edimburgo, 26,50 £ adulto) lo cubren sin recargo de zona; también cubren
+      el N44 nocturno. Según el horario vigente, el último 44 desde West End sale a las 23:54
+      todos los días (llega a Balerno a las 00:30), de día pasa cada 10–15 min entre semana y
+      sábados y cada 20 min los domingos, y el primer bus desde Balerno sale antes de las 05:30.
+      Las coordenadas son la ubicación aproximada que publica Airbnb (radio de unos 150 m),
+      dentro de Balerno, City of Edinburgh; no es Glasgow ni ninguna otra ciudad.
+    amenities: [Alojamiento completo, Entrada privada, Cocina equipada, Horno, Placa de inducción, Microondas, Wifi, Televisión]
+    pros: [Ahorro muy importante, Privacidad total, Valoración excelente, Cocina completa, Cancelación gratuita, Una sola estancia para las tres noches]
+    cons: [Unos 45 minutos en autobús al centro, Hay que salir temprano para el castillo y Arthur’s Seat, La dirección exacta solo se facilita al reservar]
+    check_in: '13 nov. · 16:00–01:00'
+    check_out: '16 nov. · antes de las 11:00'
+    cancellation_policy: Cancelación gratuita antes del 8 de noviembre; después se aplica la política parcial mostrada por Airbnb
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: baberton-private-studio
+    name: Estudio independiente CosyFlat · mejor conexión
+    type: Estudio completo anexo a una vivienda · sin espacios interiores compartidos
+    neighbourhood: Baberton · oeste de Edimburgo
+    address: Baberton, Edinburgh EH14, Escocia (Reino Unido) · Airbnb muestra la dirección exacta después de reservar
+    coordinates: { lat: 55.91175, lng: -3.28914 }
+    price_total: 382
+    rating: 4,85/5 · 220 reseñas · Superhost
+    url: "https://www.airbnb.com/rooms/35560171?adults=2&check_in=2026-11-13&check_out=2026-11-16"
+    image: /stays/cosyflat-baberton-1.jpg
+    images:
+      - /stays/cosyflat-baberton-2.jpg
+      - /stays/cosyflat-baberton-3.jpg
+    notes: >-
+      Precio total mostrado para dos personas y las tres noches del 13 al 16 de noviembre,
+      consultado el 5 de septiembre de 2026. Estudio autónomo unido a la casa principal,
+      con entrada, cocina, baño y patio de uso privado. El anfitrión estima unos 30 minutos
+      en autobús hasta el centro y 15 minutos hasta Murrayfield.
+    amenities: [Alojamiento completo, Entrada privada, Patio privado, Cocina equipada, Horno, Microondas, Lavadora, Wifi, Televisión]
+    pros: [Privacidad total, Trayecto más corto que desde Balerno, Cocina y lavadora, Excelente valoración, Una sola estancia para las tres noches]
+    cons: [Más caro que Balerno, No se llega andando al centro, La dirección exacta solo se facilita al reservar]
+    check_in: '13 nov. · confirmar la hora con el anfitrión'
+    check_out: '16 nov. · confirmar la hora con el anfitrión'
+    cancellation_policy: Airbnb mostraba cancelación gratuita; comprobar la fecha límite exacta en la pantalla final antes de reservar
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: number32-musselburgh
+    name: Number 32 · piso completo en Musselburgh
+    type: Apartamento completo de planta baja · un dormitorio con baño en suite
+    neighbourhood: Musselburgh · East Lothian, al este de Edimburgo
+    address: Musselburgh High Street, East Lothian · Airbnb muestra la dirección exacta después de reservar
+    coordinates: { lat: 55.94098, lng: -3.04675 }
+    price_total: 343
+    rating: 4,82/5 · 184 reseñas
+    url: "https://www.airbnb.com/rooms/33871201?adults=2&check_in=2026-11-13&check_out=2026-11-16"
+    image: /stays/number32-musselburgh-1.jpg
+    images:
+      - /stays/number32-musselburgh-2.jpg
+      - /stays/number32-musselburgh-3.jpg
+    notes: >-
+      Precio total consultado el 5 de septiembre de 2026 para dos personas y las tres noches.
+      Piso completo con puerta a la calle, cocina totalmente equipada, dormitorio doble y
+      1,5 baños; autoentrada con caja de llaves. Está en la calle principal de Musselburgh, con
+      tiendas y restaurantes a dos minutos, y parada de autobús enfrente: el anfitrión calcula
+      unos 50 minutos hasta el centro (líneas 26 y 44 de Lothian, incluidas en el Ridacard y
+      en el TapTapCap de la zona urbana). Sin espacio exterior; no se admiten mascotas ni fumar.
+    amenities: [Apartamento completo, Puerta a la calle, Cocina totalmente equipada, Baño en suite, Wifi, Autoentrada con caja de llaves, Aparcamiento gratuito en la calle]
+    pros: [Piso completo y muy privado, Muchas reseñas, Tiendas y cafés al lado, Una sola estancia para las tres noches]
+    cons: [Unos 50 minutos en autobús al centro, Más caro que Nivahana y Balerno, Fuera del término municipal de Edimburgo]
+    check_in: '13 nov. · confirmar la hora con el anfitrión'
+    check_out: '16 nov. · confirmar la hora con el anfitrión'
+    cancellation_policy: No mostrada en el anuncio; comprobar en la pantalla final antes de reservar
+    bedrooms: 1
+    bathrooms: 1.5
+
+  - id: clermiston-flat
+    name: Cosy flat · Clermiston, buenas conexiones con aeropuerto y centro
+    type: Apartamento completo de planta baja · un dormitorio y baño privado
+    neighbourhood: Clermiston / Corstorphine · oeste de Edimburgo
+    address: Clermiston, Edinburgh · Airbnb muestra la dirección exacta después de reservar
+    coordinates: { lat: 55.95799, lng: -3.28217 }
+    price_total: 366
+    rating: 4,92/5 · 416 reseñas · Superhost
+    url: "https://www.airbnb.com/rooms/38370928?adults=2&check_in=2026-11-13&check_out=2026-11-16"
+    image: /stays/clermiston-flat-1.jpg
+    images:
+      - /stays/clermiston-flat-2.jpg
+      - /stays/clermiston-flat-3.jpg
+    notes: >-
+      Precio total consultado el 5 de septiembre de 2026 para dos personas y las tres noches.
+      Apartamento completo en planta baja con cocina equipada y cuarto de lavado con
+      frigorífico-congelador y lavadora-secadora. El anfitrión, Superhost con nueve años de
+      experiencia, destaca las buenas conexiones de autobús con el aeropuerto y el centro
+      (unos 20–25 minutos por Corstorphine Road) y la cercanía del zoo y de Clermiston Hill.
+      Es la opción completa más cercana al centro por debajo de 400 €.
+    amenities: [Apartamento completo, Cocina equipada, Lavadora-secadora, Frigorífico-congelador, Wifi, Televisión]
+    pros: [Trayecto corto al centro y al aeropuerto, Superhost con 416 reseñas, Cocina y lavadora, Una sola estancia para las tres noches]
+    cons: [Unos 90 € más caro que Balerno, La dirección exacta solo se facilita al reservar, Supera el objetivo de 250 € por persona]
+    check_in: '13 nov. · confirmar la hora con el anfitrión'
+    check_out: '16 nov. · confirmar la hora con el anfitrión'
+    cancellation_policy: No mostrada en el anuncio; comprobar en la fecha límite de la pantalla final antes de reservar
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: airbnb-gilmore
+    name: Trendy new Reno'd central Pad · reservado
+    type: Apartamento completo · un dormitorio y baño privado
+    neighbourhood: Fountainbridge · Gilmore Place
+    address: 171 Gilmore Place, planta baja y puerta principal, Edinburgh EH3 9PL
+    coordinates: { lat: 55.9392015, lng: -3.212827 }
+    price_total: 369.86
+    rating: 4,84/5 · 76 reseñas · Superhost
+    url: "https://www.airbnb.com/rooms/1421190950146147631"
+    image: /stays/airbnb-gilmore-1.jpg
+    images:
+      - /stays/airbnb-gilmore-2.jpg
+      - /stays/airbnb-gilmore-3.jpg
+    notes: >-
+      Reserva confirmada para dos personas del 14 al 16 de noviembre. Apartamento renovado
+      en planta baja, a unos 10 minutos andando de The Meadows, 15 minutos del casco antiguo
+      y 20 minutos de Princes Street. El alojamiento completo es de uso privado. Número de
+      registro mostrado en el anuncio: 2004004.
+    amenities: [Apartamento completo, Cocina equipada, Wifi, Televisión, Lavadora, Secador, Frigorífico, Microondas, Autoentrada con caja de llaves]
+    pros: [Ya reservado, Excelente valoración, Superhost, Ubicación céntrica, Cocina y lavadora, Ningún espacio compartido]
+    cons: [No disponible la noche del 13, Obliga a cambiar de alojamiento el sábado]
+    check_in: '14 nov. · desde las 15:00'
+    check_out: '16 nov. · antes de las 11:00'
+    cancellation_policy: Cancelación gratuita antes de las 15:00 del 13 de noviembre; después y antes de la entrada del 14 de noviembre solo se ofrece un reembolso parcial
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: lavender-one-night
+    name: Lavender Guest House · solo viernes
+    type: Habitación doble privada · baño privado en suite
+    neighbourhood: Sur de Edimburgo · Gilmerton / Royal Infirmary
+    address: 126 Old Dalkeith Road, Edinburgh EH16 4SD
+    coordinates: { lat: 55.9220619, lng: -3.1483044 }
+    price_total: 110
+    rating: 8,9 · 72 reseñas
+    url: "https://www.booking.com/hotel/gb/lavender-guest-house-edinburgh.en-gb.html?checkin=2026-11-13&checkout=2026-11-14&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/lavender-1.jpg
+    images:
+      - /stays/lavender-2.jpg
+      - /stays/lavender-3.jpg
+    notes: >-
+      Recomendación para cubrir únicamente la noche del viernes 13. El precio de 110 € para
+      dos personas incluía impuestos en la búsqueda consultada. No está reservado; confirma
+      que la habitación concreta tenga baño en suite y revisa la política de cancelación al pagar.
+    amenities: [Baño privado, Wifi gratis, Aparcamiento gratuito, Parada de autobús delante]
+    pros: [Excelente valoración, Precio razonable para una sola noche, Entrada hasta medianoche]
+    cons: [Requiere desplazarse temprano a Waverley el sábado, Todavía no está reservado]
+    check_in: '13 nov. · 15:00–00:00'
+    check_out: '14 nov. · antes de las 10:30'
+    cancellation_policy: Comprobar en la pantalla final de pago; el resultado de 110 € no mostraba cancelación gratuita
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: lavender
+    name: Lavender Guest House, Near Royal Infirmary
+    type: Habitación doble privada · baño privado en suite
+    neighbourhood: Sur de Edimburgo · Gilmerton / Royal Infirmary
+    address: 126 Old Dalkeith Road, Edinburgh EH16 4SD
+    coordinates: { lat: 55.9220619, lng: -3.1483044 }
+    price_total: 366
+    rating: 8,9 · 72 reseñas
+    url: "https://www.booking.com/hotel/gb/lavender-guest-house-edinburgh.en-gb.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/lavender-1.jpg
+    images:
+      - /stays/lavender-2.jpg
+      - /stays/lavender-3.jpg
+    notes: >-
+      La mejor relación calidad-precio. La tarifa flexible de 366 € permitía cancelar hasta
+      el 8 de noviembre; también había una tarifa no reembolsable de 330 €. El autobús 33
+      para delante y las reseñas sitúan el centro a unos 15–20 minutos. Confirma si guardan
+      el equipaje antes de la entrada; si no, utiliza la consigna de Waverley.
+    amenities: [Baño privado, Wifi gratis, Aparcamiento gratuito, Parada de autobús delante]
+    pros: [Excelente valoración, Entrada flexible hasta medianoche, Dentro del presupuesto de alojamiento]
+    cons: [No se llega andando fácilmente a la mayoría de lugares del casco antiguo, Es una habitación y no un apartamento completo]
+    check_in: '17:30 prevista · el alojamiento admite entradas de 15:00–00:00'
+    check_out: '09:00 prevista · límite del alojamiento 10:30'
+    cancellation_policy: Cancelación gratuita hasta el 8 de noviembre con la tarifa de 366 €; la tarifa de 330 € no es reembolsable
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: spacious-ensuite
+    name: Dormitorio espacioso con baño privado
+    type: Habitación privada en casa particular · baño privado
+    neighbourhood: Muirhouse · noroeste de Edimburgo
+    address: 40 Muirhouse Avenue, Edinburgh EH4 4PL
+    coordinates: { lat: 55.9699684, lng: -3.2550943 }
+    price_total: 298
+    rating: Nuevo · todavía sin reseñas
+    url: "https://www.booking.com/hotel/gb/spacious-en-suite-bedroom.en-gb.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/spacious-ensuite-1.jpg
+    images:
+      - /stays/spacious-ensuite-2.jpg
+      - /stays/spacious-ensuite-3.jpg
+    notes: >-
+      La opción privada flexible más barata encontrada. También había una tarifa no
+      reembolsable de 268 €. Supone más riesgo porque no tenía reseñas y está a unos 4,4 km
+      del centro; revisa el anfitrión, la licencia y la descripción exacta antes de pagar.
+      En Booking aparece como «Spacious en-suite bedroom».
+    amenities: [Baño privado, Wifi gratis, Aparcamiento gratuito, Cama doble]
+    pros: [El total flexible más bajo, Baño privado]
+    cons: [Sin reseñas, Habitación en casa particular y no alojamiento completo, Desplazamiento diario más largo]
+    check_in: '15:00–22:00'
+    check_out: '08:00–11:00'
+    cancellation_policy: Cancelación gratuita hasta el 6 de noviembre con la tarifa de 298 €; la tarifa de 268 € no es reembolsable
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: allison-house
+    name: Allison House 16
+    type: Habitación doble pequeña · baño privado
+    neighbourhood: Newington · Mayfield Gardens
+    address: 16 Mayfield Gardens, Edinburgh EH9 2BZ
+    coordinates: { lat: 55.931983, lng: -3.1727694 }
+    price_total: 408
+    rating: 7,8 · 1.905 reseñas
+    url: "https://www.booking.com/hotel/gb/auld-reekie-guest-house.en-gb.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/allison-house-1.jpg
+    images:
+      - /stays/allison-house-2.jpg
+      - /stays/allison-house-3.jpg
+    notes: >-
+      La mejor opción intermedia si prefieres estar más cerca del centro: unos 10 minutos
+      en autobús o 25–30 minutos andando hasta el casco antiguo. Reseñas recientes mencionan
+      taquillas de equipaje de autoservicio.
+    amenities: [Baño privado, Wifi gratis, Aparcamiento gratuito, Taquillas de equipaje según las reseñas]
+    pros: [Más cerca que las opciones baratas, Muchas reseñas, Tarifa flexible]
+    cons: [Habitación doble pequeña, Más caro que Lavender]
+    cancellation_policy: Cancelación gratuita hasta el 11 de noviembre con la tarifa de 408 € consultada
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: ibis-edinburgh-park
+    name: ibis budget Hotel Edinburgh Park
+    type: Habitación privada con dos camas · baño privado
+    neighbourhood: Edinburgh Park · South Gyle
+    address: 6 Lochside View, Edinburgh EH12 9DH
+    coordinates: { lat: 55.9377493, lng: -3.3200265 }
+    price_total: 415
+    rating: 7,6 · 9.401 reseñas
+    url: "https://www.booking.com/hotel/gb/ibis-budget-edinburgh-park.en-gb.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/ibis-edinburgh-park-1.jpg
+    images:
+      - /stays/ibis-edinburgh-park-2.jpg
+      - /stays/ibis-edinburgh-park-3.jpg
+    notes: >-
+      La mejor logística entre aeropuerto y ciudad: está frente a la parada de tranvía Gyle
+      Centre y tiene recepción las 24 horas. También había una habitación con dos camas por
+      339 €, no reembolsable. Elígelo si la conexión fácil con el aeropuerto importa más que
+      poder ir andando a los lugares turísticos.
+    amenities: [Baño privado, Aire acondicionado, Wifi gratis, Recepción 24 horas, Tranvía cercano]
+    pros: [Traslado al aeropuerto muy sencillo, Hotel consolidado, Opción de cancelación tardía]
+    cons: [A unos 8 km del centro, La tarifa más baja es para dos camas y no cama doble]
+    check_in: 'Desde las 15:00'
+    check_out: 'Antes de las 12:00'
+    cancellation_policy: Cancelación gratuita hasta el 12 de noviembre con la tarifa de 415 €; la tarifa de 339 € no es reembolsable
+    bedrooms: 1
+    bathrooms: 1
+
+  - id: the-neuk
+    name: The Neuk
+    type: Anexo completo de un dormitorio · entrada y baño privados
+    neighbourhood: Craigmillar · sureste de Edimburgo
+    address: 164 Greendykes Road, Edinburgh EH16 4ES
+    coordinates: { lat: 55.930012, lng: -3.1256746 }
+    price_total: 419
+    rating: 7,1 · 27 reseñas
+    url: "https://www.booking.com/hotel/gb/the-neuk-edinburgh.en-gb.html?checkin=2026-11-13&checkout=2026-11-16&group_adults=2&no_rooms=1&group_children=0"
+    image: /stays/the-neuk-1.jpg
+    images:
+      - /stays/the-neuk-2.jpg
+      - /stays/the-neuk-3.jpg
+    notes: >-
+      La opción de alojamiento completo auténticamente privado más asequible encontrada dentro
+      de Edimburgo. Tiene frigorífico, microondas y hervidor, pero el anuncio no describe una
+      cocina completa. Gestión particular; Booking mostraba la licencia B, EH-83606-N.
+    amenities: [Alojamiento privado completo, Entrada privada, Patio, Frigorífico, Microondas, Hervidor, Aparcamiento gratuito, Wifi gratis]
+    pros: [Ningún espacio interior compartido, Cancelación flexible, Salida más tardía]
+    cons: [A 4,6 km del centro, Valoración discreta, No aparece una cocina completa]
+    check_in: 'Desde las 15:00'
+    check_out: 'Antes de las 12:00'
+    cancellation_policy: Cancelación gratuita antes del 12 de noviembre; pago el 10 de noviembre con la tarifa de 419 € consultada
+    bedrooms: 1
+    bathrooms: 1
+
+activities:
+  - id: airport-tram-in
+    name: Tranvía del aeropuerto al centro
+    category: transport
+    date: '2026-11-13'
+    time: '12:55'
+    end_time: '13:35'
+    address: Edinburgh Airport Tram Stop, Edinburgh EH12 9DN
+    coordinates: { lat: 55.9486, lng: -3.3643 }
+    price_total: 22
+    url: https://edinburghtrams.com/tickets/farefinder
+    notes: Deja unos 40 minutos desde el aterrizaje hasta subir al tranvía. Dos billetes abiertos de ida y vuelta al aeropuerto cuestan 19 £ con la tarifa actual en taquilla; guarda los trayectos de vuelta para el lunes.
+
+  - id: student-ridacard-week
+    name: Ridacard semanal de estudiante · dos personas
+    category: transport
+    price_total: 53.55
+    url: https://www.lothianbuses.com/students/
+    notes: >-
+      Dos abonos de una semana cuestan 46 £, aproximadamente 53,55 € al cambio de referencia
+      del BCE del 4 de septiembre de 2026. Incluyen Lothian Buses, NightBus, Airlink 100,
+      tranvías y las zonas A y B de Lothian Country y East Coast Buses. Solo pueden comprarlos
+      estudiantes con matrícula válida de una de las instituciones de Edimburgo aceptadas por
+      Lothian. Una tarjeta nueva añade 3 £ por persona y, al comprarse en un TravelHub del centro,
+      el primer trayecto desde el aeropuerto debe pagarse aparte.
+
+  - id: waverley-bags-friday
+    name: Dejar las maletas en la estación Waverley
+    category: practical
+    date: '2026-11-13'
+    time: '13:40'
+    end_time: '14:05'
+    address: Consigna de equipaje, andén 2 junto a la entrada de Calton Road, Edinburgh Waverley Station, EH1 1BB
+    coordinates: { lat: 55.951554, lng: -3.1916356 }
+    cost_label: Consigna · precio variable
+    url: https://www.left-baggage.co.uk/en/locations/left-luggage-edinburgh-waverley
+    notes: Abre de 07:00 a 23:00. El precio no está incluido porque depende del número de bultos y del tiempo. Omítelo si Lavender confirma que permite dejar las maletas antes de la entrada.
+
+  - id: street-food-friday
+    name: Almuerzo rápido · Edinburgh Street Food
+    category: food
+    date: '2026-11-13'
+    time: '14:10'
+    end_time: '14:50'
+    address: Edinburgh Street Food, 3 Leith Street, Edinburgh EH1 3AT
+    coordinates: { lat: 55.9545129, lng: -3.1873099 }
+    cost_label: Comida
+    url: https://edinburgh-street-food.com/
+    notes: Haz una parada breve para llegar a Calton Hill antes del atardecer; el consumo no se incluye en el total de actividades.
+
+  - id: calton-sunset
+    name: Calton Hill antes del atardecer
+    category: outdoor
+    date: '2026-11-13'
+    time: '15:05'
+    end_time: '16:35'
+    address: Calton Hill, entrada de Regent Road, Edinburgh EH7 5AA
+    coordinates: { lat: 55.9552543, lng: -3.1827977 }
+    cost_label: Mirador
+    url: https://www.foreveredinburgh.com/see-do/calton-hill/
+    notes: El sol se pone hacia las 16:08 y el crepúsculo civil termina sobre las 16:50. Llega al mirador antes de las 15:30; sube por las escaleras de Regent Road y baja antes de que sea completamente de noche.
+
+  - id: royal-mile
+    name: Paseo de orientación por Royal Mile
+    category: sight
+    date: '2026-11-13'
+    time: '18:45'
+    end_time: '19:45'
+    address: Castle Esplanade, Castlehill, Edinburgh EH1 2NG
+    coordinates: { lat: 55.9488969, lng: -3.1954305 }
+    cost_label: Paseo
+    notes: Baja desde Castle Esplanade por Lawnmarket y High Street hasta Mercat Cross.
+
+  - id: piemaker-dinner
+    name: Cena económica · Piemaker
+    category: food
+    date: '2026-11-13'
+    time: '20:00'
+    end_time: '21:00'
+    address: Piemaker, 38 South Bridge, Edinburgh EH1 1LL
+    coordinates: { lat: 55.94845, lng: -3.18712 }
+    cost_label: Cena
+    url: https://www.thepiemaker.co.uk/
+    notes: Pasteles salados de carne y opciones vegetarianas y veganas en un local informal; el consumo no se incluye en el total de actividades.
+
+  - id: lavender-checkout-bags
+    name: Salir de Lavender y dejar las maletas en Waverley
+    category: practical
+    date: '2026-11-14'
+    time: '08:00'
+    end_time: '09:10'
+    address: Consigna de equipaje, andén 2 junto a la entrada de Calton Road, Edinburgh Waverley Station, EH1 1BB
+    coordinates: { lat: 55.951554, lng: -3.1916356 }
+    cost_label: Consigna · precio variable
+    url: https://www.left-baggage.co.uk/en/locations/left-luggage-edinburgh-waverley
+    notes: >-
+      Sal de Lavender hacia las 08:00, llega en autobús a Waverley y deja las maletas antes
+      de caminar al castillo. La tarifa de consigna no está incluida. Recógelas después del
+      mercado de Navidad, durante el traslado al Airbnb.
+
+  - id: castle
+    name: Castillo de Edimburgo
+    category: sight
+    date: '2026-11-14'
+    time: '09:30'
+    end_time: '12:00'
+    address: Edinburgh Castle, Castlehill, Edinburgh EH1 2NG
+    coordinates: { lat: 55.9488969, lng: -3.1954305 }
+    price_total: 55
+    url: https://www.historicenvironment.scot/visit-a-place/places/edinburgh-castle/
+    notes: Reserva el primer turno, a las 09:30. El horario de invierno es de 09:30 a 17:00; las entradas de adulto por internet cuestan 23,50 £ cada una (47 £ para dos, unos 55 € al cambio consultado).
+
+  - id: oink-lunch
+    name: Almuerzo rápido · Oink Victoria Street
+    category: food
+    date: '2026-11-14'
+    time: '12:15'
+    end_time: '13:00'
+    address: Oink, 34 Victoria Street, Edinburgh EH1 2JW
+    coordinates: { lat: 55.9485886, lng: -3.1942458 }
+    cost_label: Comida
+    url: https://www.oinkhogroast.co.uk/shops/victoria-street/
+    notes: Bocadillos de cerdo asado y opción de haggis vegetariano. Pueden agotar existencias antes del cierre; el consumo no se incluye en el total de actividades.
+
+  - id: grassmarket-greyfriars
+    name: Paseo por Grassmarket, Victoria Street y Greyfriars
+    category: sight
+    date: '2026-11-14'
+    time: '13:00'
+    end_time: '14:00'
+    address: Grassmarket, Edinburgh EH1 2HS
+    coordinates: { lat: 55.947481, lng: -3.1962464 }
+    cost_label: Paseo
+    notes: Continúa por Victoria Street hasta Greyfriars Bobby y Greyfriars Kirkyard; todos los puntos están muy cerca.
+
+  - id: national-museum
+    name: Museo Nacional de Escocia
+    category: sight
+    date: '2026-11-14'
+    time: '14:15'
+    end_time: '16:45'
+    address: National Museum of Scotland, Chambers Street, Edinburgh EH1 1JF
+    coordinates: { lat: 55.9474165, lng: -3.1899239 }
+    cost_label: Museo
+    url: https://www.nms.ac.uk/national-museum-of-scotland/plan-your-visit
+    notes: Gratuito; abre todos los días de 10:00 a 17:00. Da prioridad a Grand Gallery, las salas de Escocia y las vistas desde la azotea si está abierta.
+
+  - id: christmas-market
+    name: Navidad en Edimburgo · noche inaugural
+    category: seasonal
+    date: '2026-11-14'
+    time: '17:05'
+    end_time: '18:15'
+    address: East Princes Street Gardens, Princes Street, Edinburgh EH2 2HG
+    coordinates: { lat: 55.9513988, lng: -3.1946448 }
+    cost_label: Mercado
+    url: https://edwinterfest.com/edinburgh-christmas/your-visit
+    notes: La temporada oficial de 2026 comienza hoy, 14 de noviembre. La entrada normal al mercado es gratuita; cualquier comida, bebida o atracción se paga aparte y no se incluye en el total. Se acorta la visita para poder recoger las maletas y entrar en el Airbnb antes de la visita de Mercat.
+
+  - id: airbnb-checkin
+    name: Recoger maletas y entrar en el Airbnb reservado
+    category: practical
+    date: '2026-11-14'
+    time: '18:15'
+    end_time: '19:30'
+    address: 171 Gilmore Place, planta baja y puerta principal, Edinburgh EH3 9PL
+    coordinates: { lat: 55.9392015, lng: -3.212827 }
+    cost_label: Cambio de alojamiento
+    url: "https://www.airbnb.com/rooms/1421190950146147631"
+    notes: >-
+      Recoge las maletas en Waverley, ve a Gilmore Place y utiliza la caja de llaves para la
+      autoentrada. Sal del apartamento hacia las 19:50 como máximo para llegar a Mercat Cross
+      con margen antes de la visita de las 20:30.
+
+  - id: mercat-ghost
+    name: Mercat Tours · visita Haunted Underground
+    category: tour
+    date: '2026-11-14'
+    time: '20:30'
+    end_time: '21:45'
+    address: Mercat Cross, High Street, frente a Edinburgh City Chambers, Edinburgh EH1 1RF
+    coordinates: { lat: 55.9496457, lng: -3.1901844 }
+    price_total: 70
+    url: https://www.mercattours.com/tours/haunted-underground
+    notes: El punto de encuentro correcto es el monumento octogonal Mercat Cross, no 22 Hunter Square. El horario actual muestra una visita a las 20:30 de 1 h 15 min por 30 £ por adulto; confirma el turno de noviembre de 2026 antes de reservar.
+
+  - id: arthurs-seat
+    name: Subida a Arthur’s Seat
+    category: outdoor
+    date: '2026-11-15'
+    time: '08:30'
+    end_time: '10:45'
+    address: Holyrood Park Education Centre, 1 Queen’s Drive, Edinburgh EH8 8HG
+    coordinates: { lat: 55.9536825, lng: -3.1677384 }
+    cost_label: Ruta al aire libre
+    url: https://www.historicenvironment.scot/visit-a-place/places/holyrood-park/
+    notes: Este marcador indica el inicio práctico de la ruta, no la cima. Lleva calzado impermeable con buen agarre y evita la cumbre si hay viento fuerte, hielo o lluvia intensa; utiliza la Galería Nacional como alternativa por mal tiempo.
+
+  - id: toast-brunch
+    name: Brunch · Toast, Leith
+    category: food
+    date: '2026-11-15'
+    time: '11:45'
+    end_time: '12:45'
+    address: Toast, 65 Shore, Leith, Edinburgh EH6 6RA
+    coordinates: { lat: 55.9752575, lng: -3.1707215 }
+    cost_label: Comida
+    url: https://toastwinecafe.com/
+    notes: Reserva para no poner en riesgo el horario de la visita al Britannia; el consumo no se incluye en el total de actividades.
+
+  - id: britannia
+    name: Yate Real Britannia
+    category: sight
+    date: '2026-11-15'
+    time: '13:15'
+    end_time: '15:30'
+    address: Ocean Terminal, Ocean Drive, Leith, Edinburgh EH6 6JJ
+    coordinates: { lat: 55.9808597, lng: -3.1779217 }
+    price_total: 52
+    url: https://www.theroyalyachtbritannia.co.uk/visit-2/
+    notes: La visita comienza en la planta 2 de Ocean Terminal. En noviembre, la última entrada es a las 15:00 y cierra a las 17:00; calcula unas dos horas. Las entradas de adulto por internet para noviembre de 2026–marzo de 2027 cuestan 22 £ cada una.
+
+  - id: new-town-lights
+    name: Luces de Princes Street y George Street
+    category: seasonal
+    date: '2026-11-15'
+    time: '16:15'
+    end_time: '17:20'
+    address: Cruce de George Street con Frederick Street, Edinburgh EH2 2LL
+    coordinates: { lat: 55.9539987, lng: -3.1948316 }
+    cost_label: Paseo
+    notes: Toma el tranvía desde Ocean Terminal hasta Princes Street y recorre George Street cuando ya haya anochecido.
+
+  - id: sunday-roast
+    name: Asado dominical · The Queen’s Arms
+    category: food
+    date: '2026-11-15'
+    time: '18:00'
+    end_time: '20:00'
+    address: The Queen’s Arms, 49 Frederick Street, Edinburgh EH2 1EP
+    coordinates: { lat: 55.9536675, lng: -3.200505 }
+    cost_label: Cena
+    url: https://queensarmsedinburgh.com/
+    notes: >-
+      Reserva porque el asado dominical se sirve desde las 11:30 hasta agotar existencias.
+      El consumo no se incluye en el total de actividades.
+
+  - id: waverley-bags-monday
+    name: Salida del alojamiento y consigna en el centro
+    category: practical
+    date: '2026-11-16'
+    time: '09:00'
+    end_time: '09:40'
+    address: Consigna de equipaje, andén 2 junto a la entrada de Calton Road, Edinburgh Waverley Station, EH1 1BB
+    coordinates: { lat: 55.951554, lng: -3.1916356 }
+    cost_label: Consigna · precio variable
+    url: https://www.left-baggage.co.uk/en/locations/left-luggage-edinburgh-waverley
+    notes: Solo hace falta con el vuelo nocturno seleccionado; utiliza la misma consigna del viernes salvo que el alojamiento guarde las maletas.
+
+  - id: dean-village
+    name: Dean Village y Well Court
+    category: sight
+    date: '2026-11-16'
+    time: '10:00'
+    end_time: '10:45'
+    address: Well Court, 3A Damside, Dean Village, Edinburgh EH4 3BB
+    coordinates: { lat: 55.9522594, lng: -3.2182207 }
+    cost_label: Paseo
+    notes: Habla bajo porque es una zona residencial. Contempla Well Court desde el paseo junto al río.
+
+  - id: water-of-leith
+    name: Paseo por Water of Leith hasta Stockbridge
+    category: outdoor
+    date: '2026-11-16'
+    time: '10:45'
+    end_time: '11:30'
+    address: Water of Leith Walkway, acceso de Dean Village en Damside, Edinburgh EH4 3BB
+    coordinates: { lat: 55.9522594, lng: -3.2182207 }
+    cost_label: Paseo
+    url: https://www.waterofleith.org.uk/walkway/
+    notes: Tramo corto junto al río que termina en Stockbridge; sube a la calle si el sendero está inundado o helado.
+
+  - id: pantry-brunch
+    name: Brunch · The Pantry, Stockbridge
+    category: food
+    date: '2026-11-16'
+    time: '11:30'
+    end_time: '12:30'
+    address: The Pantry, 1–2 North West Circus Place, Edinburgh EH3 6ST
+    coordinates: { lat: 55.9572184, lng: -3.2056287 }
+    cost_label: Comida
+    url: https://www.thepantryedinburgh.co.uk/
+    notes: Reserva o ten preparado otro café cercano en Stockbridge; el consumo no se incluye en el total de actividades.
+
+  - id: national-gallery
+    name: Galería Nacional de Escocia
+    category: sight
+    date: '2026-11-16'
+    time: '13:00'
+    end_time: '15:00'
+    address: Scottish National Gallery, The Mound, Edinburgh EH2 2EL
+    coordinates: { lat: 55.950885, lng: -3.1956117 }
+    cost_label: Museo
+    url: https://www.nationalgalleries.org/visit/scottish-national-gallery
+    notes: Gratuita; abre todos los días de 10:00 a 17:00. Esta visita solo es posible con el vuelo de vuelta nocturno seleccionado.
+
+  - id: airport-tram-out
+    name: Recoger las maletas y tomar el tranvía al aeropuerto
+    category: transport
+    date: '2026-11-16'
+    time: '15:15'
+    end_time: '16:55'
+    address: Edinburgh Waverley Station, Waverley Bridge, Edinburgh EH1 1BB
+    coordinates: { lat: 55.951554, lng: -3.1916356 }
+    cost_label: Billete de vuelta incluido
+    url: https://edinburghtrams.com/plan-journey/timetables
+    notes: Recoge las maletas, camina hasta la parada de tranvía St Andrew Square y sube hacia las 16:15. El trayecto al aeropuerto dura menos de 35 minutos; llegarás a la terminal unas tres horas antes del FR5685.
+
+  - id: zoo-lanterns
+    name: Alternativa opcional · Giant Lanterns del zoo de Edimburgo
+    category: seasonal
+    address: Edinburgh Zoo, 134 Corstorphine Road, Edinburgh EH12 6TS
+    coordinates: { lat: 55.9454726, lng: -3.2695886 }
+    price_total: 57
+    url: https://www.edinburghzoo.org.uk/events-experiences/events/edinburgh-zoos-giant-lanterns
+    notes: Alternativa estacional para el viernes o el domingo por la tarde. Se celebra en noches concretas desde el 13 de noviembre de 2026. La tarifa oficial publicada es de 22 £ en fechas valle o 23,50 £ en fechas estándar por adulto, más 1 £ de gastos de reserva por entrada; 57 € es el máximo aproximado para dos. Úsala como sustitución, no como añadido a una tarde ya completa.
+
+  - id: teuchters-landing
+    name: Copa opcional en Leith · Teuchters Landing
+    category: food
+    address: Teuchters Landing, 1c Dock Place, Leith, Edinburgh EH6 6LU
+    coordinates: { lat: 55.97582, lng: -3.17158 }
+    cost_label: Bebida
+    url: https://teuchtersbar.co.uk/teuchters-landing/
+    notes: Whisky o pinta opcional cerca de The Shore; solo si vais adelantados respecto al horario del Britannia.
+
 selected:
-  stay: dryden
-  activities: []
+  outbound_flight: fr188-out
+  return_flight: fr5685-return
+  stay: split-lavender-airbnb
+  activities:
+    - airport-tram-in
+    - waverley-bags-friday
+    - street-food-friday
+    - calton-sunset
+    - royal-mile
+    - piemaker-dinner
+    - lavender-checkout-bags
+    - castle
+    - oink-lunch
+    - grassmarket-greyfriars
+    - national-museum
+    - christmas-market
+    - airbnb-checkin
+    - mercat-ghost
+    - arthurs-seat
+    - toast-brunch
+    - britannia
+    - new-town-lights
+    - sunday-roast
+    - waverley-bags-monday
+    - dean-village
+    - water-of-leith
+    - pantry-brunch
+    - national-gallery
+    - airport-tram-out
