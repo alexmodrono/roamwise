@@ -1,3 +1,4 @@
+import { RoamwiseLogo } from './roamwise-logo';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTripDocument } from '@/hooks/use-trip-document';
 import { buildItinerary } from '@/packages/core/itinerary';
@@ -35,7 +36,7 @@ export default function AgentPreview({ session }: { session: string }) {
   return (
     <main className="mx-auto max-w-4xl space-y-8 p-5 sm:p-10">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-        <strong>Roamwise</strong>
+        <strong className="flex items-center gap-2"><RoamwiseLogo className="size-7" />Roamwise</strong>
         <span role="status" className="text-sm text-black/55">
           {status}
         </span>
