@@ -1,4 +1,5 @@
 'use client';
+import { RoamwiseLogo } from './roamwise-logo';
 import { apiEnabled } from '@/lib/api';
 import { StayImage } from './stay-image';
 
@@ -818,7 +819,7 @@ export default function TripViewer({
             <div className="grid size-8 place-items-center rounded-lg bg-black text-white">
               <MapPin size={16} />
             </div>
-            <a href="/" aria-label="Roamwise home" className="font-semibold tracking-tight">Roamwise</a>
+            <a href="/" aria-label="Roamwise home" className="flex items-center gap-2 font-semibold tracking-tight"><RoamwiseLogo className="size-7" />Roamwise</a>
             <span className="hidden max-w-48 truncate text-sm text-black/45 xl:inline">
               / {trip.trip.title || 'New trip'}
             </span>
@@ -1045,7 +1046,7 @@ export default function TripViewer({
                     </h2>
                     <p className="mt-1 text-xs text-black/40">
                       {trip.flights.provider
-                        ? `Live basic fares via ${trip.flights.provider}`
+                        ? `Source: ${trip.flights.provider}`
                         : 'Add a flight or retrieve live fares'}
                       {trip.flights.updated_at
                         ? ` · checked ${new Date(trip.flights.updated_at).toISOString().slice(11, 16)} UTC`

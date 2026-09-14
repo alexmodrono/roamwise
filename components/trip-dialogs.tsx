@@ -101,7 +101,7 @@ export function AddEntryDialog({
                   label="To"
                   value={draft.to}
                   setValue={(value) => set('to', value.toUpperCase())}
-                  placeholder="EDI"
+                  placeholder="SVQ"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -135,7 +135,7 @@ export function AddEntryDialog({
                     label="Neighbourhood"
                     value={draft.neighbourhood}
                     setValue={(value) => set('neighbourhood', value)}
-                    placeholder="Old Town"
+                    placeholder="historic centre"
                   />
                   <div className="grid grid-cols-3 gap-3">
                     <Field
@@ -464,7 +464,7 @@ export function TripSettingsDialog({
               setValue={(value) =>
                 set({ destination: { ...form.destination, name: value } })
               }
-              placeholder="Edinburgh"
+              placeholder="Seville"
             />
             <Field
               label="Destination code (IATA)"
@@ -477,7 +477,7 @@ export function TripSettingsDialog({
                   },
                 })
               }
-              placeholder="EDI"
+              placeholder="SVQ"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">

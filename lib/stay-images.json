@@ -191,42 +191,6 @@
       "height": 720
     }
   ],
-  "/stays/ibis-edinburgh-park-1.jpg": [
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-1-480.webp",
-      "width": 480,
-      "height": 360
-    },
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-1-960.webp",
-      "width": 960,
-      "height": 720
-    }
-  ],
-  "/stays/ibis-edinburgh-park-2.jpg": [
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-2-480.webp",
-      "width": 480,
-      "height": 360
-    },
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-2-960.webp",
-      "width": 960,
-      "height": 720
-    }
-  ],
-  "/stays/ibis-edinburgh-park-3.jpg": [
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-3-480.webp",
-      "width": 480,
-      "height": 360
-    },
-    {
-      "src": "/stays/optimized/ibis-edinburgh-park-3-960.webp",
-      "width": 960,
-      "height": 720
-    }
-  ],
   "/stays/lavender-1.jpg": [
     {
       "src": "/stays/optimized/lavender-1-480.webp",

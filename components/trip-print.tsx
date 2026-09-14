@@ -331,7 +331,7 @@ export default function FinalVersion({
             </div>
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                Actividades y extras
+                Activities and extras
               </h3>
               {paidActivities.length ? (
                 <>
@@ -345,17 +345,17 @@ export default function FinalVersion({
                     ))}
                   </ul>
                   <p className="mt-3 flex items-baseline justify-between border-t pt-3 text-sm">
-                    <strong>Total de actividades de pago</strong>
+                    <strong>Paid activities total</strong>
                     <strong>{money(activitiesTotal, currency)}</strong>
                   </p>
                   <p className="mt-2 text-xs text-black/45">
-                    Solo suma entradas y transportes con un precio definido;
-                    comida y gastos variables no están incluidos.
+                    Includes only activities with a known price;
+                    unpriced meals and other variable expenses are excluded.
                   </p>
                 </>
               ) : (
                 <p className="mt-3 text-sm text-black/40">
-                  No hay actividades con precio definido.
+                  No activities with a known price.
                 </p>
               )}
             </div>

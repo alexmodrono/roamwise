@@ -8,7 +8,7 @@ const minimal = readFileSync('skills/roamwise/assets/minimal-trip.yaml', 'utf8')
 function check(mutator: (trip: ReturnType<typeof parseTrip>) => void) { const trip = parseTrip(minimal); mutator(trip); return validateTrip(stringifyTrip(trip)); }
 
 void test('minimal, complete, and blank documents round-trip without losing selections', () => {
-  for (const source of [minimal, readFileSync('public/trips/edinburgh.trip.yaml', 'utf8'), stringifyTrip(EMPTY_TRIP)]) {
+  for (const source of [minimal, readFileSync('public/trips/seville.trip.yaml', 'utf8'), stringifyTrip(EMPTY_TRIP)]) {
     const trip = parseTrip(source);
     assert.deepEqual(parseTrip(stringifyTrip(trip)), trip);
   }
@@ -36,7 +36,7 @@ void test('nested values, real dates, safe URLs, and coordinate ranges are check
 });
 void test('IDs are unique and selections must resolve to the matching group', () => {
   assert.ok(check(trip => trip.activities.push({ ...trip.activities[0] })).errors.some(issue => issue.path === 'activities[1].id'));
-  assert.ok(check(trip => { trip.selected.stay = 'royal-mile'; }).errors.some(issue => issue.path === 'selected.stay'));
+  assert.ok(check(trip => { trip.selected.stay = 'plaza-espana'; }).errors.some(issue => issue.path === 'selected.stay'));
   assert.ok(check(trip => { trip.selected.activities = ['missing']; }).errors.some(issue => issue.path === 'selected.activities[0]'));
 });
 void test('missing prices are unknown, zero is free, and only selected prices count', () => {
@@ -51,7 +51,7 @@ void test('missing prices are unknown, zero is free, and only selected prices co
 void test('missing locations warn and do not block itinerary rendering', () => {
   const result = check(trip => { delete trip.activities[0].coordinates; });
   assert.equal(result.valid, true); assert.ok(result.warnings.some(issue => issue.path.endsWith('coordinates')));
-  assert.equal(buildItinerary(result.trip!)[1].events[0].id, 'royal-mile');
+  assert.equal(buildItinerary(result.trip!)[1].events[0].id, 'plaza-espana');
 });
 void test('day construction includes DST boundaries and orders activity times', () => {
   const trip = parseTrip(minimal);
@@ -63,11 +63,11 @@ void test('day construction includes DST boundaries and orders activity times', 
 });
 void test('flight chronology respects offsets; legacy migration preserves selection', () => {
   const trip = parseTrip(minimal);
-  trip.flights.outbound = [{ id: 'flight', airline: 'Example', from: 'MAD', to: 'EDI', depart: '2026-11-13T10:00:00+01:00', arrive: '2026-11-13T09:30:00Z' }];
+  trip.flights.outbound = [{ id: 'flight', airline: 'Example', from: 'MAD', to: 'SVQ', depart: '2027-04-09T10:00:00+01:00', arrive: '2027-04-09T09:30:00Z' }];
   assert.equal(validateTrip(stringifyTrip(trip)).valid, true);
-  trip.flights.outbound[0].arrive = '2026-11-13T08:30:00Z';
+  trip.flights.outbound[0].arrive = '2027-04-09T08:30:00Z';
   assert.ok(validateTrip(stringifyTrip(trip)).errors.some(issue => issue.path.endsWith('arrive')));
-  const legacy = { schema: 'roamwise/v1', trip: trip.trip, flights: [{ id: 'round', airline: 'Example', price_per_person: 100, outbound: { from: 'MAD', to: 'EDI', depart: '2026-11-13T10:00:00+01:00', arrive: '2026-11-13T12:00:00Z' }, return: { from: 'EDI', to: 'MAD', depart: '2026-11-16T10:00:00Z', arrive: '2026-11-16T14:00:00+01:00' } }], selected: { flight: 'round' } };
+  const legacy = { schema: 'roamwise/v1', trip: trip.trip, flights: [{ id: 'round', airline: 'Example', price_per_person: 100, outbound: { from: 'MAD', to: 'SVQ', depart: '2027-04-09T10:00:00+01:00', arrive: '2027-04-09T12:00:00Z' }, return: { from: 'SVQ', to: 'MAD', depart: '2027-04-12T10:00:00Z', arrive: '2027-04-12T14:00:00+01:00' } }], selected: { flight: 'round' } };
   const result = validateTrip(JSON.stringify(legacy));
   assert.equal(result.valid, true, JSON.stringify(result.errors)); assert.equal(result.trip!.selected.outbound_flight, 'round-out'); assert.equal(result.trip!.flights.outbound[0].price_per_person, 50); assert.ok(result.warnings.some(issue => issue.path === 'schema'));
 });

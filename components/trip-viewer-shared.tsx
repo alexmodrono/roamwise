@@ -194,23 +194,23 @@ export function activityCostText(item: Activity, currency: string) {
   if (item.cost_label) return item.cost_label;
   switch (item.category) {
     case 'food':
-      return 'Comida';
+      return 'Food';
     case 'sight':
-      return 'Visita';
+      return 'Sightseeing';
     case 'transport':
-      return 'Transporte';
+      return 'Transport';
     case 'outdoor':
-      return 'Aire libre';
+      return 'Outdoor';
     case 'shopping':
-      return 'Compras';
+      return 'Shopping';
     case 'practical':
-      return 'Logística';
+      return 'Logistics';
     case 'seasonal':
-      return 'Actividad estacional';
+      return 'Seasonal activity';
     case 'tour':
-      return 'Visita guiada';
+      return 'Guided tour';
     default:
-      return 'Actividad';
+      return 'Activity';
   }
 }
 export function eventTimeText(event: DayEvent): string {

@@ -7,25 +7,25 @@ A trip is UTF-8 YAML with `schema: roamwise/v2`. Prefer `destination-trip.yaml`;
 ```yaml
 schema: roamwise/v2
 trip:
-  title: A weekend in Edinburgh
-  dates: { start: '2026-11-13', end: '2026-11-16' }
+  title: A weekend in Seville
+  dates: { start: '2027-04-09', end: '2027-04-12' }
   travellers: 2
-  currency: GBP
+  currency: EUR
   origin: { name: Madrid, code: MAD }
   destination:
-    name: Edinburgh
-    code: EDI
-    coordinates: { lat: 55.9533, lng: -3.1883 }
+    name: Seville
+    code: SVQ
+    coordinates: { lat: 37.3891, lng: -5.9845 }
 activities:
-  - id: royal-mile
-    name: Walk the Royal Mile
-    date: '2026-11-14'
+  - id: plaza-espana
+    name: Explore Plaza de España
+    date: '2027-04-10'
     time: '10:00'
     end_time: '11:30'
-    coordinates: { lat: 55.9508, lng: -3.1854 }
+    coordinates: { lat: 37.3772, lng: -5.9869 }
     price_total: 0
 selected:
-  activities: [royal-mile]
+  activities: [plaza-espana]
 ```
 
 Only `schema` and `trip` are required at the top level. Empty sections default to empty lists/objects. Metadata defaults: title and place names `''`, dates `''`, travellers `1`, currency `EUR`. Empty dates represent an unfinished plan. Defaults apply only to missing fields, never to wrong types. IDs must be globally unique strings of letters, digits, underscores, and hyphens, start with a letter or digit, and be at most 120 characters. Reference IDs exactly in `selected`.
@@ -34,7 +34,7 @@ Only `schema` and `trip` are required at the top level. Empty sections default t
 
 `trip`: `title`, `dates: {start, end}`, `travellers` (positive integer), `currency` (three uppercase currency letters), optional `budget_per_person`, `origin`, `destination`. Each place has `name`, optional `code` and `coordinates: {lat, lng}`. Latitude is -90…90, longitude -180…180.
 
-`flights`: `outbound: []`, `return: []`, optional `provider`, `updated_at` (ISO timestamp). Each flight requires `id`, `airline`, `from`, `to`, `depart`, `arrive`. Optional: `flight_number`, `price_per_person`, `url`, `live` (boolean), `fare_source`, `price_updated_at`. Times use ISO date-times; include an offset, such as `2026-11-13T10:20:00+01:00`. Offset-free local date-times are accepted with a warning for compatibility. Arrival must not precede departure. Each entry is an alternative; select one outbound and one return.
+`flights`: `outbound: []`, `return: []`, optional `provider`, `updated_at` (ISO timestamp). Each flight requires `id`, `airline`, `from`, `to`, `depart`, `arrive`. Optional: `flight_number`, `price_per_person`, `url`, `live` (boolean), `fare_source`, `price_updated_at`. Times use ISO date-times; include an offset, such as `2027-04-09T10:20:00+01:00`. Offset-free local date-times are accepted with a warning for compatibility. Arrival must not precede departure. Each entry is an alternative; select one outbound and one return.
 
 `stays`: a list of options, each requiring `id`, `name`. Optional: `type`, `address`, `coordinates`, `price_total`, `rating` (string), `url`, `image`, `images` (list), `notes`, `neighbourhood`, `amenities`, `pros`, `cons` (lists of strings), `check_in`, `check_out` (display strings), `cancellation_policy`, `bedrooms`, `bathrooms`, `size_m2` (nonnegative numbers). The selected stay spans the trip dates. Multiple dated accommodation segments are not part of v2.
 

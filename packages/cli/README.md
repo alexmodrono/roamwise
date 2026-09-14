@@ -3,9 +3,9 @@
 Open portable YAML trip plans in a live local browser preview. Node.js 22.13+.
 
 ```sh
-npx --yes --package=@roamwise/cli@0.1.0 roamwise validate edinburgh-trip.yaml --json
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open edinburgh-trip.yaml
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open edinburgh-trip.yaml --print-url --json
+npx --yes --package=@roamwise/cli@0.1.0 roamwise validate seville-trip.yaml --json
+npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml
+npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml --print-url --json
 npx skills add OWNER/REPOSITORY --skill roamwise -g
 ```
 

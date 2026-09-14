@@ -6,7 +6,7 @@ The app starts completely blank. Everything — trip metadata, flights, stays an
 
 ## Trip files
 
-Drop a `.trip.yaml` file anywhere on the page, load it with the **Load** button, edit the YAML view directly, or start blank and fill in the trip details. A trip contains metadata (dates, travellers, currency, origin/destination with IATA codes), flights, stays, activities (with `date`, `time` and `end_time` for scheduling) and selected option IDs. See `public/trips/edinburgh.trip.yaml` for a complete example.
+Drop a `.trip.yaml` file anywhere on the page, load it with the **Load** button, edit the YAML view directly, or start blank and fill in the trip details. A trip contains metadata (dates, travellers, currency, origin/destination with IATA codes), flights, stays, activities (with `date`, `time` and `end_time` for scheduling) and selected option IDs. See `public/trips/seville.trip.yaml` for a complete example.
 
 ## Live flight fares
 
