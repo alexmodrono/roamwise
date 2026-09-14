@@ -1,0 +1,52 @@
+[
+  {
+    "file": "index-D4rP0SCq.css",
+    "bytes": 227960,
+    "gzip": 33291
+  },
+  {
+    "file": "index-Dpc6fZpi.js",
+    "bytes": 488147,
+    "gzip": 135617
+  },
+  {
+    "file": "maplibre-gl-CKRTiAqP.css",
+    "bytes": 82869,
+    "gzip": 10515
+  },
+  {
+    "file": "maplibre-gl-DBSdmz4W.js",
+    "bytes": 1057631,
+    "gzip": 279860
+  },
+  {
+    "file": "maplibre-gl-worker-C8Pak6Ey.js",
+    "bytes": 506662,
+    "gzip": 143607
+  },
+  {
+    "file": "trip-dialogs-Ctjw3swb.js",
+    "bytes": 64698,
+    "gzip": 20644
+  },
+  {
+    "file": "trip-print-B_gqRlWf.js",
+    "bytes": 14240,
+    "gzip": 3922
+  },
+  {
+    "file": "x-Cl9Iu37k.js",
+    "bytes": 144,
+    "gzip": 139
+  },
+  {
+    "file": "yaml-editor-ClCFThZr.css",
+    "bytes": 11687,
+    "gzip": 7007
+  },
+  {
+    "file": "yaml-editor-CuY8C3E9.js",
+    "bytes": 358928,
+    "gzip": 115849
+  }
+]

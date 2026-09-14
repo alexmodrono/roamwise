@@ -1,0 +1,27 @@
+[
+  {
+    "file": "index-9ehtkAKT.js",
+    "bytes": 557099,
+    "gzip": 155608
+  },
+  {
+    "file": "index-DupQb9_B.css",
+    "bytes": 303869,
+    "gzip": 42996
+  },
+  {
+    "file": "maplibre-gl-DNiOPgup.js",
+    "bytes": 1025022,
+    "gzip": 272302
+  },
+  {
+    "file": "maplibre-gl-worker-C8Pak6Ey.js",
+    "bytes": 506662,
+    "gzip": 143607
+  },
+  {
+    "file": "yaml-editor-2b4sDy3r.js",
+    "bytes": 358925,
+    "gzip": 115847
+  }
+]

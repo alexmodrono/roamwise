@@ -1,0 +1,410 @@
+{
+  "/stays/airbnb-gilmore-1.jpg": [
+    {
+      "src": "/stays/optimized/airbnb-gilmore-1-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/airbnb-gilmore-1-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/airbnb-gilmore-2.jpg": [
+    {
+      "src": "/stays/optimized/airbnb-gilmore-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/airbnb-gilmore-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/airbnb-gilmore-3.jpg": [
+    {
+      "src": "/stays/optimized/airbnb-gilmore-3-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/airbnb-gilmore-3-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/allison-house-1.jpg": [
+    {
+      "src": "/stays/optimized/allison-house-1-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/allison-house-1-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/allison-house-2.jpg": [
+    {
+      "src": "/stays/optimized/allison-house-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/allison-house-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/allison-house-3.jpg": [
+    {
+      "src": "/stays/optimized/allison-house-3-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/allison-house-3-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/balerno-suite-1.jpg": [
+    {
+      "src": "/stays/optimized/balerno-suite-1-480.webp",
+      "width": 480,
+      "height": 640
+    },
+    {
+      "src": "/stays/optimized/balerno-suite-1-960.webp",
+      "width": 960,
+      "height": 1280
+    }
+  ],
+  "/stays/balerno-suite-2.jpg": [
+    {
+      "src": "/stays/optimized/balerno-suite-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/balerno-suite-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/balerno-suite-3.jpg": [
+    {
+      "src": "/stays/optimized/balerno-suite-3-480.webp",
+      "width": 480,
+      "height": 640
+    },
+    {
+      "src": "/stays/optimized/balerno-suite-3-960.webp",
+      "width": 960,
+      "height": 1280
+    }
+  ],
+  "/stays/clermiston-flat-1.jpg": [
+    {
+      "src": "/stays/optimized/clermiston-flat-1-480.webp",
+      "width": 480,
+      "height": 320
+    },
+    {
+      "src": "/stays/optimized/clermiston-flat-1-960.webp",
+      "width": 960,
+      "height": 640
+    }
+  ],
+  "/stays/clermiston-flat-2.jpg": [
+    {
+      "src": "/stays/optimized/clermiston-flat-2-480.webp",
+      "width": 480,
+      "height": 320
+    },
+    {
+      "src": "/stays/optimized/clermiston-flat-2-960.webp",
+      "width": 960,
+      "height": 640
+    }
+  ],
+  "/stays/clermiston-flat-3.jpg": [
+    {
+      "src": "/stays/optimized/clermiston-flat-3-480.webp",
+      "width": 480,
+      "height": 320
+    },
+    {
+      "src": "/stays/optimized/clermiston-flat-3-960.webp",
+      "width": 960,
+      "height": 640
+    }
+  ],
+  "/stays/cosyflat-baberton-1.jpg": [
+    {
+      "src": "/stays/optimized/cosyflat-baberton-1-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/cosyflat-baberton-1-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/cosyflat-baberton-2.jpg": [
+    {
+      "src": "/stays/optimized/cosyflat-baberton-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/cosyflat-baberton-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/cosyflat-baberton-3.jpg": [
+    {
+      "src": "/stays/optimized/cosyflat-baberton-3-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/cosyflat-baberton-3-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/dryden.jpg": [
+    {
+      "src": "/stays/optimized/dryden-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/dryden-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/ibis-edinburgh-park-1.jpg": [
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-1-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-1-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/ibis-edinburgh-park-2.jpg": [
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/ibis-edinburgh-park-3.jpg": [
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-3-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/ibis-edinburgh-park-3-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/lavender-1.jpg": [
+    {
+      "src": "/stays/optimized/lavender-1-480.webp",
+      "width": 480,
+      "height": 720
+    },
+    {
+      "src": "/stays/optimized/lavender-1-960.webp",
+      "width": 512,
+      "height": 768
+    }
+  ],
+  "/stays/lavender-2.jpg": [
+    {
+      "src": "/stays/optimized/lavender-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/lavender-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/lavender-3.jpg": [
+    {
+      "src": "/stays/optimized/lavender-3-480.webp",
+      "width": 480,
+      "height": 320
+    },
+    {
+      "src": "/stays/optimized/lavender-3-960.webp",
+      "width": 960,
+      "height": 640
+    }
+  ],
+  "/stays/lavender.jpg": [
+    {
+      "src": "/stays/optimized/lavender-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/lavender-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/moon.jpg": [
+    {
+      "src": "/stays/optimized/moon-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/moon-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/number32-musselburgh-1.jpg": [
+    {
+      "src": "/stays/optimized/number32-musselburgh-1-480.webp",
+      "width": 480,
+      "height": 640
+    },
+    {
+      "src": "/stays/optimized/number32-musselburgh-1-960.webp",
+      "width": 960,
+      "height": 1280
+    }
+  ],
+  "/stays/number32-musselburgh-2.jpg": [
+    {
+      "src": "/stays/optimized/number32-musselburgh-2-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/number32-musselburgh-2-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/number32-musselburgh-3.jpg": [
+    {
+      "src": "/stays/optimized/number32-musselburgh-3-480.webp",
+      "width": 480,
+      "height": 640
+    },
+    {
+      "src": "/stays/optimized/number32-musselburgh-3-960.webp",
+      "width": 960,
+      "height": 1280
+    }
+  ],
+  "/stays/spacious-ensuite-1.jpg": [
+    {
+      "src": "/stays/optimized/spacious-ensuite-1-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/spacious-ensuite-1-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/spacious-ensuite-2.jpg": [
+    {
+      "src": "/stays/optimized/spacious-ensuite-2-480.webp",
+      "width": 480,
+      "height": 640
+    },
+    {
+      "src": "/stays/optimized/spacious-ensuite-2-960.webp",
+      "width": 576,
+      "height": 768
+    }
+  ],
+  "/stays/spacious-ensuite-3.jpg": [
+    {
+      "src": "/stays/optimized/spacious-ensuite-3-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/spacious-ensuite-3-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/suite.jpg": [
+    {
+      "src": "/stays/optimized/suite-480.webp",
+      "width": 480,
+      "height": 360
+    },
+    {
+      "src": "/stays/optimized/suite-960.webp",
+      "width": 960,
+      "height": 720
+    }
+  ],
+  "/stays/the-neuk-1.jpg": [
+    {
+      "src": "/stays/optimized/the-neuk-1-480.webp",
+      "width": 480,
+      "height": 679
+    },
+    {
+      "src": "/stays/optimized/the-neuk-1-960.webp",
+      "width": 543,
+      "height": 768
+    }
+  ],
+  "/stays/the-neuk-2.jpg": [
+    {
+      "src": "/stays/optimized/the-neuk-2-480.webp",
+      "width": 480,
+      "height": 679
+    },
+    {
+      "src": "/stays/optimized/the-neuk-2-960.webp",
+      "width": 543,
+      "height": 768
+    }
+  ],
+  "/stays/the-neuk-3.jpg": [
+    {
+      "src": "/stays/optimized/the-neuk-3-480.webp",
+      "width": 480,
+      "height": 679
+    },
+    {
+      "src": "/stays/optimized/the-neuk-3-960.webp",
+      "width": 543,
+      "height": 768
+    }
+  ]
+}
