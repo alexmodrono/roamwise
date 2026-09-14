@@ -141,6 +141,13 @@ body {
   background: #e9e9e9;
 }
 
+/* Landing terminal: blinking block cursor (see components/landing-page.tsx). */
+@keyframes landing-cursor-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.landing-terminal-cursor { animation: landing-cursor-blink 1.06s steps(1, end) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .landing-terminal-cursor { animation: none; }
+}
+
 @page { size: A4 portrait; margin: 0; }
 
 @media print {
