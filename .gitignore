@@ -36,3 +36,11 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Local CLI distribution
+/packages/cli/dist/
+/packages/cli/*.tgz
+/.test-build/
+/public/downloads/*.tgz
+
+*.tsbuildinfo

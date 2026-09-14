@@ -1,0 +1,421 @@
+{
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "roamwise/v2"
+    },
+    "trip": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "dates": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "trip-date",
+              "default": ""
+            },
+            "end": {
+              "type": "string",
+              "format": "trip-date",
+              "default": ""
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "travellers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "default": "EUR"
+        },
+        "budget_per_person": {
+          "type": "number",
+          "minimum": 0
+        },
+        "origin": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "default": ""
+            },
+            "code": {
+              "type": "string"
+            },
+            "coordinates": {
+              "$ref": "#/definitions/coordinates"
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "destination": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "default": ""
+            },
+            "code": {
+              "type": "string"
+            },
+            "coordinates": {
+              "$ref": "#/definitions/coordinates"
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "flights": {
+      "type": "object",
+      "properties": {
+        "outbound": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/flight"
+          },
+          "maxItems": 2000,
+          "default": []
+        },
+        "return": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/flight"
+          },
+          "maxItems": 2000,
+          "default": []
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "trip-datetime"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "stays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/stay"
+      },
+      "maxItems": 2000,
+      "default": []
+    },
+    "activities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/activity"
+      },
+      "maxItems": 2000,
+      "default": []
+    },
+    "selected": {
+      "type": "object",
+      "properties": {
+        "outbound_flight": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "return_flight": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "stay": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "maxItems": 2000,
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "trip"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Roamwise trip v2",
+  "description": "Portable trip plan. Custom trip-date, trip-datetime, trip-url and trip-image formats are documented in format.md and checked by the Roamwise validator.",
+  "definitions": {
+    "coordinates": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lng": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lat",
+        "lng"
+      ]
+    },
+    "flight": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "airline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "flight_number": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "depart": {
+          "type": "string",
+          "format": "trip-datetime"
+        },
+        "arrive": {
+          "type": "string",
+          "format": "trip-datetime"
+        },
+        "price_per_person": {
+          "type": "number",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "format": "trip-url"
+        },
+        "live": {
+          "type": "boolean"
+        },
+        "fare_source": {
+          "type": "string"
+        },
+        "price_updated_at": {
+          "type": "string",
+          "format": "trip-datetime"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "airline",
+        "from",
+        "to",
+        "depart",
+        "arrive"
+      ]
+    },
+    "stay": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "address": {
+          "type": "string"
+        },
+        "coordinates": {
+          "$ref": "#/definitions/coordinates"
+        },
+        "url": {
+          "type": "string",
+          "format": "trip-url"
+        },
+        "image": {
+          "type": "string",
+          "format": "trip-image"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "string"
+        },
+        "neighbourhood": {
+          "type": "string"
+        },
+        "check_in": {
+          "type": "string"
+        },
+        "check_out": {
+          "type": "string"
+        },
+        "cancellation_policy": {
+          "type": "string"
+        },
+        "price_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "trip-image"
+          },
+          "maxItems": 2000
+        },
+        "amenities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2000
+        },
+        "pros": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2000
+        },
+        "cons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2000
+        },
+        "bedrooms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bathrooms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "size_m2": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "activity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "address": {
+          "type": "string"
+        },
+        "coordinates": {
+          "$ref": "#/definitions/coordinates"
+        },
+        "url": {
+          "type": "string",
+          "format": "trip-url"
+        },
+        "image": {
+          "type": "string",
+          "format": "trip-image"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "trip-date"
+        },
+        "time": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "end_time": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "category": {
+          "type": "string"
+        },
+        "price_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cost_label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ]
+    }
+  }
+}
