@@ -24,11 +24,11 @@ export function LandingPromptDialog({ kind, hero = false }: { kind: 'trip' | 'ag
 
    npx skills add alexmodrono/roamwise --skill roamwise -y
 
-   Install into the current project, using the installer's agent selection if needed. The repository is planned but has not been created yet. If it is unavailable and you are in a Roamwise source checkout, use:
+   Install into the current project, using the installer's agent selection if needed. If repository access fails and you are in a Roamwise source checkout, use:
 
    npx skills add ./skills/roamwise --skill roamwise -y
 
-   Otherwise, report that the repository is not available yet. Do not substitute a different repository or package.
+   Otherwise, report the actual installation error and resolve repository access. Do not substitute a different repository or package.
 
 2. Read the installed roamwise SKILL.md and follow its instructions. Let the skill handle runtime installation, trip creation, validation, preview startup, and subsequent updates. Do not duplicate that workflow or install the Roamwise CLI globally.
 
