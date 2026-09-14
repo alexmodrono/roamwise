@@ -1,0 +1,11 @@
+{
+  "name": "@roamwise/cli",
+  "version": "0.1.0",
+  "description": "Visualize portable YAML trip plans with a live local preview for coding agents",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22.13.0" },
+  "bin": { "roamwise": "dist/cli.mjs" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": { "prepack": "node ../../scripts/build-cli.mjs" }
+}
