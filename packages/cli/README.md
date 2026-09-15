@@ -15,7 +15,7 @@ For an unpublished release tarball, use `npm exec --yes --package=/absolute/path
 
 `open` starts/reuses a background loopback server and returns immediately. File edits, including atomic replacements, update the preview. Invalid YAML leaves the last valid trip visible with diagnostics. The viewer is read-only; it never overwrites your file. Maps and optional HTTPS images use network services; trip YAML is not uploaded.
 
-`roamwise status --json` checks the server and `roamwise stop` stops it. Set `ROAMWISE_STATE_DIR` to isolate a server's state. For remote workspaces, arrange port forwarding using the host environment. Run `roamwise help agent` for the bundled skill instructions.
+`roamwise status --json` checks the server and `roamwise stop` stops it. Set `ROAMWISE_STATE_DIR` to isolate a server's state. For remote workspaces, arrange port forwarding using the host environment. Run `roamwise help agent` for skill installation instructions.
 
 Validation exits 0 for valid files, 1 for invalid documents, and 2 for operational errors. Warnings do not make a document invalid.
 

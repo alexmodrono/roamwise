@@ -65,7 +65,7 @@ async function main() {
   if (command === '--version' || command === 'version') return output({ version: '0.1.0' }, '0.1.0');
   if (command === 'help' || command === '--help' || command === '-h') {
     console.log(`Roamwise — portable trip previews\n\n  roamwise open <file.yaml> [--print-url | --no-open] [--json]\n  roamwise validate <file.yaml> [--json]\n  roamwise start [--json]\n  roamwise status [--json]\n  roamwise stop [--json]\n  roamwise help agent\n\nOpen returns immediately; a shared server keeps visible previews live and stops after five idle minutes.\nNo YAML files are uploaded or modified. Map tiles and optional remote images use the network.`);
-    if (args[1] === 'agent') console.log(await readFile(join(dist, 'skill', 'SKILL.md'), 'utf8'));
+    if (args[1] === 'agent') console.log('Install the Roamwise skill first:\n\n  npx skills add alexmodrono/roamwise --skill roamwise -y\n\nRead the installed SKILL.md and follow it for trip creation, validation and previews.');
     return;
   }
   if (command === 'validate') {
