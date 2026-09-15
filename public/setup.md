@@ -12,7 +12,7 @@ npx skills add alexmodrono/roamwise --skill roamwise -g
 
 Choose your agent in the installer, or add `-a codex`, `-a claude-code`, or `-a cursor`. Omit `-g` for a project-local installation. Skills uses `add`, not `install`; a bare `roamwise` name is not the repository source. Update with `npx skills update roamwise -g`.
 
-**Release status:** the skill is available from GitHub. `@roamwise/cli@0.1.0` has not yet been published by this project; use the release-tarball workflow below until the npm release is available.
+**Release status:** the skill is available from GitHub. `@alexmodrono/roamwise@0.1.0` has not yet been published by this project; use the release-tarball workflow below until the npm release is available.
 
 From a source checkout, the skill can already be installed with:
 
@@ -25,8 +25,8 @@ npx skills add ./skills/roamwise -g
 After the npm release is published, tell your agent: “Use Roamwise to plan my trip and open the preview.” The skill runs a pinned CLI through `npx`; you do not need a global installation:
 
 ```sh
-npx --yes --package=@roamwise/cli@0.1.0 roamwise validate "trip.yaml" --json
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open "trip.yaml" --print-url --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise validate "trip.yaml" --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise open "trip.yaml" --print-url --json
 ```
 
 The first command may download the runtime into npm's cache. `open` returns a local URL immediately and leaves a shared preview server running. The agent reuses that preview while editing your YAML. Visible previews update live; hidden previews pause. The server stops after five minutes without connected viewers. Run the pinned open command again to obtain a new URL after shutdown.
@@ -35,10 +35,10 @@ For remote workspaces, use your environment's port forwarding; a remote localhos
 
 ## Before the npm release
 
-Download `/downloads/roamwise-cli-0.1.0.tgz` from this website. Run it without installing globally, using the absolute path to the downloaded tarball:
+Download `/downloads/alexmodrono-roamwise-0.1.0.tgz` from this website. Run it without installing globally, using the absolute path to the downloaded tarball:
 
 ```sh
-npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open "/absolute/path/trip.yaml" --print-url --json
+npm exec --yes --package=/absolute/path/alexmodrono-roamwise-0.1.0.tgz -- roamwise open "/absolute/path/trip.yaml" --print-url --json
 ```
 
 From source, `npm ci` followed by `npm run pack:cli` produces the tarball under `packages/cli/`.

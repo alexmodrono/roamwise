@@ -37,7 +37,7 @@ export function TripOnboarding({ onLoad, onBlank, onPaste }: { onLoad: () => voi
       {fallback && <Textarea aria-label="Trip generation prompt" value={fallback} readOnly onFocus={event => event.currentTarget.select()} className="mt-3 h-48 font-mono" />}
       <div className="mt-5 flex flex-wrap gap-5 text-sm underline underline-offset-4"><a href="/trips/seville.trip.yaml" download>Full Spain demo</a><a href="/format.md" target="_blank" rel="noreferrer">Format guide</a><a href="/trip.schema.json" target="_blank" rel="noreferrer">JSON Schema</a></div>
     </div>
-    <p className="text-sm"><a href="/downloads/roamwise-cli-0.1.0.tgz" download className="underline underline-offset-4">Download a CLI release tarball</a> · Node.js 22.13 or newer</p>
+    <p className="text-sm"><a href="/downloads/alexmodrono-roamwise-0.1.0.tgz" download className="underline underline-offset-4">Download a CLI release tarball</a> · Node.js 22.13 or newer</p>
     <a href="/setup.md" target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl border p-5 text-sm hover:bg-neutral-50"><Code2 className="shrink-0" /><span><strong className="block">Use with Codex, Claude Code, or Cursor</strong><span className="mt-1 block text-black/60">Add the Roamwise skill. Your agent runs the CLI on demand through npx.</span></span></a>
   </div>;
 }

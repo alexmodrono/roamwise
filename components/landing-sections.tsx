@@ -9,8 +9,8 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, Code2, Compass, Copy, FileT
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
-const VALIDATE_COMMAND = 'npx --yes --package=@roamwise/cli@0.1.0 roamwise validate trip.yaml --json';
-const OPEN_COMMAND = 'npx --yes --package=@roamwise/cli@0.1.0 roamwise open trip.yaml';
+const VALIDATE_COMMAND = 'npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise validate trip.yaml --json';
+const OPEN_COMMAND = 'npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise open trip.yaml';
 const TERMINAL_DONE_STEP = 6;
 
 function AgentTerminal({ editorial = false }: { editorial?: boolean }) {

@@ -3,15 +3,15 @@
 Open portable YAML trip plans in a live local browser preview. Node.js 22.13+.
 
 ```sh
-npx --yes --package=@roamwise/cli@0.1.0 roamwise validate seville-trip.yaml --json
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml --print-url --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise validate seville-trip.yaml --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise open seville-trip.yaml
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise open seville-trip.yaml --print-url --json
 npx skills add alexmodrono/roamwise --skill roamwise -g
 ```
 
 The GitHub repository is `alexmodrono/roamwise`. The skill can be installed now; the npm release is not yet published by this checkout. Skills installs the instructions; the agent runs the pinned runtime through `npx`, with no global CLI installation. Use `-a codex`, `-a claude-code`, or `-a cursor` to target an agent.
 
-For an unpublished release tarball, use `npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json`.
+For an unpublished release tarball, use `npm exec --yes --package=/absolute/path/alexmodrono-roamwise-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json`.
 
 `open` starts/reuses a background loopback server and returns immediately. File edits, including atomic replacements, update the preview. Invalid YAML leaves the last valid trip visible with diagnostics. The viewer is read-only; it never overwrites your file. Maps and optional HTTPS images use network services; trip YAML is not uploaded.
 

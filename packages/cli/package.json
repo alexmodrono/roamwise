@@ -1,5 +1,5 @@
 {
-  "name": "@roamwise/cli",
+  "name": "@alexmodrono/roamwise",
   "version": "0.1.0",
   "description": "Visualize portable YAML trip plans with a live local preview for coding agents",
   "type": "module",

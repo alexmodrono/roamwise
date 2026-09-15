@@ -41,7 +41,7 @@ MIT
 
 ## Agent add-on and local previews
 
-The website provides the editor; the standalone CLI provides a lighter read-only agent preview. The CLI is packaged as `@roamwise/cli`; this checkout can build a tarball before npm publication.
+The website provides the editor; the standalone CLI provides a lighter read-only agent preview. The CLI is packaged as `@alexmodrono/roamwise`; this checkout can build a tarball before npm publication.
 
 ```bash
 npm ci
@@ -52,14 +52,14 @@ npx skills add ./skills/roamwise -g
 Use `-a claude-code`, `-a codex`, or `-a cursor` to target an agent; omit `-g` for a project-local skill. The skill includes the format reference and a minimal example. Until the pinned npm release is published, pass the built tarball by absolute path:
 
 ```bash
-npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json
+npm exec --yes --package=/absolute/path/alexmodrono-roamwise-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json
 ```
 
 After publication, the agent can execute the pinned runtime directly:
 
 ```bash
-npx --yes --package=@roamwise/cli@0.1.0 roamwise validate "my-trip.yaml" --json
-npx --yes --package=@roamwise/cli@0.1.0 roamwise open "my-trip.yaml" --print-url --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise validate "my-trip.yaml" --json
+npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise open "my-trip.yaml" --print-url --json
 ```
 
 `open` returns immediately and starts or reuses a background server bound to `127.0.0.1`. It serves explicitly registered files, watches changes (including atomic replacements), and streams updates to the browser. The local preview is read-only. Invalid edits keep the last valid trip visible with diagnostics. Use `--print-url` when the agent opens its own browser or the environment has no default browser. Remote environments need their own port forwarding. `ROAMWISE_STATE_DIR` overrides the default `~/.roamwise` server state directory.
@@ -70,7 +70,7 @@ The CLI has no AI key requirement, cloud storage, or runtime dependency on the s
 
 The website accepts uploads, drag-and-drop, or pasted YAML. “Copy prompt for your AI” includes the format in the clipboard text so ChatGPT, Claude chat, and other assistants can produce a valid file without installing anything. If clipboard access is unavailable, the prompt appears in a selectable text area. Files are parsed in the browser; edited trips can be downloaded.
 
-The website also serves the installable CLI at `/downloads/roamwise-cli-0.1.0.tgz`; `npm run build` builds and packages it before building the site.
+The website also serves the installable CLI at `/downloads/alexmodrono-roamwise-0.1.0.tgz`; `npm run build` builds and packages it before building the site.
 
 Published resources: `/setup.md`, `/format.md`, `/trip.schema.json`, and `/trips/minimal-trip.yaml`. Their canonical sources are the skill reference/example and `packages/core/trip.schema.json`; `npm run dev` and `npm run build` synchronize the copies.
 
@@ -105,7 +105,7 @@ See [performance and distribution notes](docs/performance.md) for measurements, 
 
 ### Skill-first public installation
 
-The preferred release flow is `npx skills add alexmodrono/roamwise --skill roamwise -g`, followed by asking the agent to plan a trip. The GitHub repository is https://github.com/alexmodrono/roamwise. The skill invokes `npx --yes --package=@roamwise/cli@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. See [setup instructions](public/setup.md) for local and tarball workflows.
+The preferred release flow is `npx skills add alexmodrono/roamwise --skill roamwise -g`, followed by asking the agent to plan a trip. The GitHub repository is https://github.com/alexmodrono/roamwise. The skill invokes `npx --yes --package=@alexmodrono/roamwise@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. See [setup instructions](public/setup.md) for local and tarball workflows.
 
 ### Public landing and planner
 
