@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { GeoJSONSource, Map as LibreMap } from 'maplibre-gl';
-import type { Coordinates } from '@/lib/trip-schema';
+import type { Coordinates } from '@/packages/core/trip-schema';
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { MAP_STYLE_URL } from '@/lib/maps';
 

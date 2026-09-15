@@ -9,7 +9,7 @@ npx --yes --package=@roamwise/cli@0.1.0 roamwise open seville-trip.yaml --print-
 npx skills add alexmodrono/roamwise --skill roamwise -g
 ```
 
-The GitHub repository is `alexmodrono/roamwise`. The skill can be installed now; the npm release is not yet published by this checkout. Skills installs the instructions; the agent runs the pinned runtime through `npx`, with no global CLI installation. Use `-a codex`, `-a claude-code`, or `-a cursor` to target an agent. The legacy `roamwise install-skill` command remains for compatibility.
+The GitHub repository is `alexmodrono/roamwise`. The skill can be installed now; the npm release is not yet published by this checkout. Skills installs the instructions; the agent runs the pinned runtime through `npx`, with no global CLI installation. Use `-a codex`, `-a claude-code`, or `-a cursor` to target an agent.
 
 For an unpublished release tarball, use `npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open /absolute/path/trip.yaml --print-url --json`.
 

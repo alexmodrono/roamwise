@@ -13,7 +13,7 @@ const executable = join(temp, 'node_modules/@roamwise/cli/dist/cli.mjs');
 try {
   await exec('npm', ['install', '--prefix', temp, '--ignore-scripts', '--no-audit', '--no-fund', archive]);
   // npm exec is npx's execution backend. Use an isolated cache and no global install.
-  const { stdout } = await exec('npm', ['exec', '--yes', `--cache=${join(temp, 'npm-cache')}`, `--package=${archive}`, '--', 'roamwise', 'open', join(temp, 'node_modules/@roamwise/cli/dist/skill/assets/minimal-trip.yaml'), '--print-url', '--json'], { cwd: runDirectory, env });
+  const { stdout } = await exec('npm', ['exec', '--yes', `--cache=${join(temp, 'npm-cache')}`, `--package=${archive}`, '--', 'roamwise', 'open', join(temp, 'node_modules/@roamwise/cli/dist/viewer/trips/minimal-trip.yaml'), '--print-url', '--json'], { cwd: runDirectory, env });
   const { url } = JSON.parse(stdout);
   const response = await fetch(url); assert.equal(response.status, 200);
   const html = await response.text();
@@ -33,7 +33,7 @@ try {
   assert.ok(fontPaths.length > 0, 'Self-hosted WOFF2 fonts must be bundled');
   assert.equal((await fetch(new URL(fontPaths[0], new URL(cssPath, url)))).status, 200);
 
-  const { stdout: validation } = await exec(process.execPath, [executable, 'validate', join(temp, 'node_modules/@roamwise/cli/dist/skill/assets/minimal-trip.yaml'), '--json'], { cwd: temp, env });
+  const { stdout: validation } = await exec(process.execPath, [executable, 'validate', join(temp, 'node_modules/@roamwise/cli/dist/viewer/trips/minimal-trip.yaml'), '--json'], { cwd: temp, env });
   assert.equal(JSON.parse(validation).valid, true);
   console.log('Packaged CLI runs through npm exec without global installation and keeps its preview server alive; viewer assets, styles, example, and validator verified.');
 } finally {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BedDouble, Landmark, Map as MapIcon, Sparkles } from 'lucide-react';
 import { MapCanvas, type MapPoint } from '@/components/map-canvas';
-import type { Coordinates, TripDocument } from '@/lib/trip-schema';
+import type { Coordinates, TripDocument } from '@/packages/core/trip-schema';
 
 type Highlight = { id: string; name: string; category: string; coordinates: Coordinates };
 type Layers = { stays: boolean; activities: boolean; highlights: boolean };

@@ -13,7 +13,7 @@ The CLI remains separate (`npm run pack:cli`); static builds include its downloa
 - Map point data updates only when point properties change. Camera fitting only depends on positions and the destination center, so changing prices or notes does not reset the camera.
 - Dialogs and print layout are separate dynamic chunks. The YAML editor and its JetBrains Mono font styles load when opened.
 - IBM Plex Sans uses the five existing faces (regular, italic, medium, semibold, bold), all needed by the UI. Both font families use WOFF2 with Unicode ranges so international subsets load only when needed. Regenerate font styles with `node scripts/prepare-fonts.mjs` after font package updates.
-- Bundled stay photographs use responsive 480/960 WebP variants with explicit dimensions and asynchronous decoding. Cards load lazily; details and print images eagerly. External photo URLs are preserved. Regenerate bundled variants with `npm run optimize:images` when originals change; originals remain for backwards-compatible saved trip URLs.
+- Bundled stay photographs use responsive 480/960 WebP variants with explicit dimensions and asynchronous decoding. Cards load lazily; details and print images eagerly. External photo URLs are preserved. Regenerate bundled variants with `npm run optimize:images` when originals change; originals are the source assets for image optimization.
 
 ## Reproduce measurements
 

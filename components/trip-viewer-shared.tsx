@@ -1,6 +1,6 @@
 'use client';
 
-import { type Activity, type FlightLeg } from '@/lib/trip-schema';
+import { type Activity, type FlightLeg } from '@/packages/core/trip-schema';
 import {
   Bus,
   ExternalLink,

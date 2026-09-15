@@ -18,7 +18,7 @@ import {
   NativeSelectOption,
 } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
-import { type Stay, type TripDetails } from '@/lib/trip-schema';
+import { type Stay, type TripDetails } from '@/packages/core/trip-schema';
 import {
   Bath,
   BedDouble,
@@ -106,18 +106,16 @@ export function AddEntryDialog({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Field
-                  label="Departure"
+                  label="Departure (with UTC offset)"
                   value={draft.depart}
                   setValue={(value) => set('depart', value)}
-                  placeholder=""
-                  type="datetime-local"
+                  placeholder="2027-04-09T10:00+02:00"
                 />
                 <Field
-                  label="Arrival"
+                  label="Arrival (with UTC offset)"
                   value={draft.arrive}
                   setValue={(value) => set('arrive', value)}
-                  placeholder=""
-                  type="datetime-local"
+                  placeholder="2027-04-09T10:00+02:00"
                 />
               </div>
             </>

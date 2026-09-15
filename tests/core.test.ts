@@ -61,13 +61,19 @@ void test('day construction includes DST boundaries and orders activity times', 
   assert.deepEqual(days.map(day => day.date), ['2026-10-24', '2026-10-25', '2026-10-26']);
   assert.deepEqual(days[1].events.map(event => event.id), ['early', 'late']);
 });
-void test('flight chronology respects offsets; legacy migration preserves selection', () => {
+void test('flight chronology respects offsets', () => {
   const trip = parseTrip(minimal);
   trip.flights.outbound = [{ id: 'flight', airline: 'Example', from: 'MAD', to: 'SVQ', depart: '2027-04-09T10:00:00+01:00', arrive: '2027-04-09T09:30:00Z' }];
   assert.equal(validateTrip(stringifyTrip(trip)).valid, true);
   trip.flights.outbound[0].arrive = '2027-04-09T08:30:00Z';
   assert.ok(validateTrip(stringifyTrip(trip)).errors.some(issue => issue.path.endsWith('arrive')));
-  const legacy = { schema: 'roamwise/v1', trip: trip.trip, flights: [{ id: 'round', airline: 'Example', price_per_person: 100, outbound: { from: 'MAD', to: 'SVQ', depart: '2027-04-09T10:00:00+01:00', arrive: '2027-04-09T12:00:00Z' }, return: { from: 'SVQ', to: 'MAD', depart: '2027-04-12T10:00:00Z', arrive: '2027-04-12T14:00:00+01:00' } }], selected: { flight: 'round' } };
-  const result = validateTrip(JSON.stringify(legacy));
-  assert.equal(result.valid, true, JSON.stringify(result.errors)); assert.equal(result.trip!.selected.outbound_flight, 'round-out'); assert.equal(result.trip!.flights.outbound[0].price_per_person, 50); assert.ok(result.warnings.some(issue => issue.path === 'schema'));
+
+});
+
+void test('unsupported schemas and nonportable fields are rejected', () => {
+  assert.equal(check(trip => { (trip as {schema: string}).schema = 'roamwise/unsupported'; }).valid, false);
+  assert.equal(check(trip => { trip.activities[0].image = '/images/photo.jpg'; }).valid, false);
+  const trip = parseTrip(minimal);
+  trip.flights.outbound = [{id: 'no-offset', airline: 'Example', from: 'MAD', to: 'SVQ', depart: '2027-04-09T10:00:00', arrive: '2027-04-09T11:00:00'}];
+  assert.equal(validateTrip(stringifyTrip(trip)).valid, false);
 });

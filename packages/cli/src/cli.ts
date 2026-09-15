@@ -1,4 +1,4 @@
-import { readFile, mkdir, rm, cp, stat } from 'node:fs/promises';
+import { readFile, mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -64,7 +64,7 @@ function valueAfter(flag: string, fallback: string) { const index = args.indexOf
 async function main() {
   if (command === '--version' || command === 'version') return output({ version: '0.1.0' }, '0.1.0');
   if (command === 'help' || command === '--help' || command === '-h') {
-    console.log(`Roamwise — portable trip previews\n\n  roamwise open <file.yaml> [--print-url | --no-open] [--json]\n  roamwise validate <file.yaml> [--json]\n  roamwise start [--json]\n  roamwise status [--json]\n  roamwise stop [--json]\n  roamwise install-skill --agent codex|claude|cursor [--scope user|project]\n  roamwise help agent\n\nOpen returns immediately; a shared server keeps visible previews live and stops after five idle minutes.\nNo YAML files are uploaded or modified. Map tiles and optional remote images use the network.`);
+    console.log(`Roamwise — portable trip previews\n\n  roamwise open <file.yaml> [--print-url | --no-open] [--json]\n  roamwise validate <file.yaml> [--json]\n  roamwise start [--json]\n  roamwise status [--json]\n  roamwise stop [--json]\n  roamwise help agent\n\nOpen returns immediately; a shared server keeps visible previews live and stops after five idle minutes.\nNo YAML files are uploaded or modified. Map tiles and optional remote images use the network.`);
     if (args[1] === 'agent') console.log(await readFile(join(dist, 'skill', 'SKILL.md'), 'utf8'));
     return;
   }
@@ -89,16 +89,6 @@ async function main() {
     const state = await start(); const result = await request(state, '/api/open', { path });
     if (!args.includes('--print-url') && !args.includes('--no-open')) try { await openBrowser(String(result.url)); } catch { process.stderr.write('Could not launch a browser. Open the printed URL manually.\n'); }
     output(result, String(result.url)); return;
-  }
-  if (command === 'install-skill') {
-    const agent = valueAfter('--agent', ''); const scope = valueAfter('--scope', 'user');
-    const roots: Record<string, string> = { codex: '.agents', claude: '.claude', cursor: '.cursor' };
-    if (!roots[agent] || !['user', 'project'].includes(scope)) throw new Error('Use --agent codex|claude|cursor and --scope user|project');
-    const target = join(scope === 'project' ? process.cwd() : homedir(), roots[agent], 'skills', 'roamwise');
-    await mkdir(dirname(target), { recursive: true });
-    try { await mkdir(target); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'EEXIST') throw new Error(`Skill already exists at ${target}; inspect or remove it before reinstalling`); throw error; }
-    await cp(join(dist, 'skill'), target, { recursive: true, force: false, errorOnExist: true });
-    output({ installed: true, path: target, agent }, `Installed Roamwise skill at ${target}`); return;
   }
   throw new Error(`Unknown command: ${command}. Run roamwise help.`);
 }

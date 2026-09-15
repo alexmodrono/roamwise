@@ -17,7 +17,7 @@ await build({
   },
   resolve: { alias: { '@': root } },
   css: { postcss: { plugins: [tailwindcss()] } },
-  build: { outDir: resolve('dist/static'), emptyOutDir: true, rolldownOptions: { input: { main: resolve('packages/web/index.html'), planner: resolve('packages/web/planner/index.html'), alternate: resolve('packages/web/landing-v2/index.html') } } },
+  build: { outDir: resolve('dist/static'), emptyOutDir: true, rolldownOptions: { input: { main: resolve('packages/web/index.html'), planner: resolve('packages/web/planner/index.html') } } },
 });
 for (const name of [
   'downloads',

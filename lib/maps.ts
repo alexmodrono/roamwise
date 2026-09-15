@@ -1,4 +1,4 @@
-import type { Coordinates } from '@/lib/trip-schema';
+import type { Coordinates } from '@/packages/core/trip-schema';
 
 export const MAP_STYLE_URL = '/maps/orchard.json';
 

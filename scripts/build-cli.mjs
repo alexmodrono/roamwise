@@ -20,7 +20,6 @@ await cp(resolve(root, 'skills/roamwise/references/format.md'), resolve(dist, 'v
 await cp(resolve(root, 'packages/core/trip.schema.json'), resolve(dist, 'viewer/trip.schema.json'));
 await cp(resolve(root, 'public/setup.md'), resolve(dist, 'viewer/setup.md'));
 await cp(resolve(root, 'public/maps'), resolve(dist, 'viewer/maps'), { recursive: true });
-await cp(resolve(root, 'skills/roamwise'), resolve(dist, 'skill'), { recursive: true });
 await cp(resolve(root, 'LICENSE'), resolve(root, 'packages/cli/LICENSE'));
 await chmod(resolve(dist, 'cli.mjs'), 0o755);
 

@@ -41,7 +41,7 @@ Download `/downloads/roamwise-cli-0.1.0.tgz` from this website. Run it without i
 npm exec --yes --package=/absolute/path/roamwise-cli-0.1.0.tgz -- roamwise open "/absolute/path/trip.yaml" --print-url --json
 ```
 
-From source, `npm ci` followed by `npm run pack:cli` produces the tarball under `packages/cli/`. The legacy `roamwise install-skill` command remains available for existing installations, but Skills is the preferred installation method.
+From source, `npm ci` followed by `npm run pack:cli` produces the tarball under `packages/cli/`.
 
 ## ChatGPT and Claude chat
 

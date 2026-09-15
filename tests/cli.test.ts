@@ -60,22 +60,14 @@ void test('CLI opens isolated sessions, follows atomic edits, rejects unauthoriz
     assert.equal((await run('status')).running, false);
   } finally { abort.abort(); await run('stop').catch(() => {}); await sleep(150); await rm(dir, { recursive: true, force: true }); }
 });
-void test('CLI validation exit codes and per-project skill installers work without altering guidance', { timeout: 15000 }, async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'roamwise-skill-'));
+void test('CLI validation reports valid, invalid and missing files', { timeout: 15000 }, async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'roamwise-validation-'));
   try {
     const file = join(dir, 'trip.yaml'); await writeFile(file, minimal);
     const result = await exec(process.execPath, [cli, 'validate', file, '--json']); assert.equal(JSON.parse(result.stdout).valid, true);
     await writeFile(file, minimal + '\nunknown: true');
     await assert.rejects(exec(process.execPath, [cli, 'validate', file, '--json']), error => { const result = error as Error & { code: number; stdout: string }; return result.code === 1 && JSON.parse(result.stdout).errors[0].path === 'unknown'; });
     await assert.rejects(exec(process.execPath, [cli, 'validate', join(dir, 'missing.yaml'), '--json']), error => (error as Error & { code: number }).code === 2);
-    await writeFile(join(dir, 'AGENTS.md'), 'Keep this guidance.');
-    for (const [agent, folder] of [['codex', '.agents'], ['claude', '.claude'], ['cursor', '.cursor']]) {
-      await exec(process.execPath, [cli, 'install-skill', '--agent', agent, '--scope', 'project'], { cwd: dir });
-      assert.match(await readFile(join(dir, folder, 'skills/roamwise/SKILL.md'), 'utf8'), /roamwise validate/);
-      assert.ok((await readFile(join(dir, folder, 'skills/roamwise/references/format.md'), 'utf8')).length > 100);
-      await assert.rejects(exec(process.execPath, [cli, 'install-skill', '--agent', agent, '--scope', 'project'], { cwd: dir }));
-    }
-    assert.equal(await readFile(join(dir, 'AGENTS.md'), 'utf8'), 'Keep this guidance.');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

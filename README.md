@@ -76,7 +76,7 @@ Published resources: `/setup.md`, `/format.md`, `/trip.schema.json`, and `/trips
 
 ## Architecture and validation
 
-- `packages/core`: YAML parser, JSON Schema, semantic validation, v1 migration, cost calculations, and itinerary construction. `lib/trip-schema.ts` remains a compatibility export for existing routes.
+- `packages/core`: YAML parser, JSON Schema, semantic validation, cost calculations, and itinerary construction.
 - `components/trip-viewer.tsx`: shared React viewer; `app/page.tsx` mounts the website version.
 - `hooks/use-trip-document.ts`: browser persistence or a read-only local event stream.
 - `packages/cli`: standalone CLI, restricted local HTTP server, and Vite viewer entry point. `scripts/build-cli.mjs` bundles runtime dependencies and static viewer assets.
@@ -105,7 +105,7 @@ See [performance and distribution notes](docs/performance.md) for measurements, 
 
 ### Skill-first public installation
 
-The preferred release flow is `npx skills add alexmodrono/roamwise --skill roamwise -g`, followed by asking the agent to plan a trip. The GitHub repository is https://github.com/alexmodrono/roamwise. The skill invokes `npx --yes --package=@roamwise/cli@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. The legacy installer remains available for compatibility. See [setup instructions](public/setup.md) for local and tarball workflows.
+The preferred release flow is `npx skills add alexmodrono/roamwise --skill roamwise -g`, followed by asking the agent to plan a trip. The GitHub repository is https://github.com/alexmodrono/roamwise. The skill invokes `npx --yes --package=@roamwise/cli@0.1.0 roamwise …`; users do not need a global CLI install. Publish that npm version before advertising this flow. Update the skill's runtime pin alongside future releases. See [setup instructions](public/setup.md) for local and tarball workflows.
 
 ### Public landing and planner
 

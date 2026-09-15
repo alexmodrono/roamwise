@@ -59,30 +59,6 @@ export const EMPTY_TRIP: TripDocument = {
   selected: { activities: [] },
 };
 
-type LegacyTrip = Record<string, unknown> & { schema?: string; trip?: Record<string, unknown> };
-function asRecord(value: unknown): Record<string, unknown> { return value && typeof value === 'object' ? value as Record<string, unknown> : {}; }
-function str(value: unknown): string { return typeof value === 'string' ? value : ''; }
-
-function migrateV1(value: LegacyTrip): TripDocument {
-  const trip = asRecord(value.trip);
-  const originCode = str(asRecord(trip.origin).code);
-  const destinationCode = str(asRecord(trip.destination).code);
-  const roundTrips = (Array.isArray(value.flights) ? value.flights : []).map(asRecord);
-  const toLeg = (item: Record<string, unknown>, legKey: 'outbound' | 'return', suffix: string, fallbackFrom: string, fallbackTo: string): FlightLeg => {
-    const part = asRecord(item[legKey]);
-    return {
-      id: `${str(item.id) || 'flight'}-${suffix}`, airline: str(item.airline) || 'Airline',
-      from: str(part.from) || fallbackFrom, to: str(part.to) || fallbackTo,
-      depart: str(part.depart), arrive: str(part.arrive),
-      price_per_person: typeof item.price_per_person === 'number' ? item.price_per_person / 2 : undefined, url: str(item.url) || undefined,
-    };
-  };
-  const outbound: FlightLeg[] = roundTrips.map((item) => toLeg(item, 'outbound', 'out', originCode, destinationCode)).filter((item) => item.depart);
-  const returns: FlightLeg[] = roundTrips.map((item) => toLeg(item, 'return', 'return', destinationCode, originCode)).filter((item) => item.depart);
-  const selected = asRecord(value.selected);
-  return { ...value, schema: 'roamwise/v2', flights: { outbound, return: returns }, selected: { outbound_flight: str(selected.flight) ? `${str(selected.flight)}-out` : undefined, return_flight: str(selected.flight) ? `${str(selected.flight)}-return` : undefined, stay: str(selected.stay) || undefined, activities: Array.isArray(selected.activities) ? selected.activities.filter((item): item is string => typeof item === 'string') : [] } } as unknown as TripDocument;
-}
-
 export type TripIssue = { path: string; message: string; line?: number; column?: number };
 export type TripValidation = { valid: boolean; trip?: TripDocument; errors: TripIssue[]; warnings: TripIssue[] };
 export { MAX_TRIP_BYTES } from './limits';
@@ -101,10 +77,6 @@ export function validateTrip(source: string): TripValidation {
     // Trip documents are trees. Reject aliases (including cycles) before converting.
     YAML.visit(document, { Alias() { throw new Error('YAML aliases are not supported; write the values directly'); } });
     value = document.toJS({ maxAliasCount: 0 });
-    if (asRecord(value).schema === 'roamwise/v1') {
-      value = migrateV1(asRecord(value));
-      warnings.push({ path: 'schema', message: 'Migrated v1 to v2; legacy round-trip fares are split equally between the two legs' });
-    }
   } catch (error) { return { valid: false, errors: [{ path: '$', message: error instanceof Error ? error.message : 'Invalid YAML' }], warnings }; }
   if (!validate(value)) {
     for (const error of validate.errors ?? []) {
@@ -127,12 +99,10 @@ export function validateTrip(source: string): TripValidation {
     allIds.add(item.id);
     if ('depart' in item) {
       if (Date.parse(item.arrive) < Date.parse(item.depart)) errors.push({ path: `${path}.arrive`, message: 'Arrival must not precede departure' });
-      if (!/(Z|[+-]\d{2}:\d{2})$/.test(item.depart) || !/(Z|[+-]\d{2}:\d{2})$/.test(item.arrive)) warnings.push({ path, message: 'Include UTC offsets in flight times to make timezone comparisons reliable' });
       if (item.price_per_person === undefined) warnings.push({ path: `${path}.price_per_person`, message: 'Price unknown; excluded from the known cost subtotal' });
     } else {
       if (!item.coordinates) warnings.push({ path: `${path}.coordinates`, message: 'No coordinates; this item will appear in the itinerary but not as a map pin' });
       if (item.price_total === undefined) warnings.push({ path: `${path}.price_total`, message: 'Price unknown; excluded from the known cost subtotal' });
-      for (const image of [item.image, ...('images' in item ? item.images ?? [] : [])]) if (image?.startsWith('/')) warnings.push({ path: `${path}.image`, message: 'Site-relative image is not portable; use an optional HTTPS image or omit it' });
     }
   }
   for (const [field, items] of [['outbound_flight', trip.flights.outbound], ['return_flight', trip.flights.return], ['stay', trip.stays]] as const) {

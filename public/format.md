@@ -34,7 +34,7 @@ Only `schema` and `trip` are required at the top level. Empty sections default t
 
 `trip`: `title`, `dates: {start, end}`, `travellers` (positive integer), `currency` (three uppercase currency letters), optional `budget_per_person`, `origin`, `destination`. Each place has `name`, optional `code` and `coordinates: {lat, lng}`. Latitude is -90…90, longitude -180…180.
 
-`flights`: `outbound: []`, `return: []`, optional `provider`, `updated_at` (ISO timestamp). Each flight requires `id`, `airline`, `from`, `to`, `depart`, `arrive`. Optional: `flight_number`, `price_per_person`, `url`, `live` (boolean), `fare_source`, `price_updated_at`. Times use ISO date-times; include an offset, such as `2027-04-09T10:20:00+01:00`. Offset-free local date-times are accepted with a warning for compatibility. Arrival must not precede departure. Each entry is an alternative; select one outbound and one return.
+`flights`: `outbound: []`, `return: []`, optional `provider`, `updated_at` (ISO timestamp). Each flight requires `id`, `airline`, `from`, `to`, `depart`, `arrive`. Optional: `flight_number`, `price_per_person`, `url`, `live` (boolean), `fare_source`, `price_updated_at`. Times use ISO date-times; include an offset, such as `2027-04-09T10:20:00+01:00`. UTC offsets are required. Arrival must not precede departure. Each entry is an alternative; select one outbound and one return.
 
 `stays`: a list of options, each requiring `id`, `name`. Optional: `type`, `address`, `coordinates`, `price_total`, `rating` (string), `url`, `image`, `images` (list), `notes`, `neighbourhood`, `amenities`, `pros`, `cons` (lists of strings), `check_in`, `check_out` (display strings), `cancellation_policy`, `bedrooms`, `bathrooms`, `size_m2` (nonnegative numbers). The selected stay spans the trip dates. Multiple dated accommodation segments are not part of v2.
 
@@ -44,12 +44,12 @@ Only `schema` and `trip` are required at the top level. Empty sections default t
 
 All prices use the trip currency. Flight prices are per person; stay prices are for the entire stay and group; activity prices are for the entire group. Prices are nonnegative numbers. Omit an unknown price; `0` means free. Subtotals include known selected prices only. Record estimated costs in notes/cost labels or flight `fare_source`; do not present estimates as verified quotes.
 
-Links must use HTTP or HTTPS without embedded credentials. Images should use HTTPS and must be optional; site-relative `/images/...` paths are accepted for older documents but warn because they do not travel with the YAML. Images are not downloaded or bundled by the CLI. Missing coordinates omit a map pin, not the itinerary entry. The viewer does not infer or geocode coordinates during basic rendering.
+Links must use HTTP or HTTPS without embedded credentials. Images must use HTTPS and are optional. Images are not downloaded or bundled by the CLI. Missing coordinates omit a map pin, not the itinerary entry. The viewer does not infer or geocode coordinates during basic rendering.
 
-## Validation and compatibility
+## Validation
 
 `roamwise validate path/to/trip.yaml --json` returns `valid`, `errors`, and `warnings`. Each issue includes a field `path` and a `message`; YAML syntax errors may also include line and column. Exit codes: 0 valid, 1 invalid, 2 operational error. The website uses the same validator.
 
-The JSON Schema is at `/trip.schema.json`. Roamwise additionally checks real calendar dates, date ranges, ID references, and flight chronology. Its JSON Schema custom formats are `trip-date` (calendar date or empty draft), `trip-datetime` (ISO timestamp, offset optional for compatibility), `trip-url` (HTTP/HTTPS URL), and `trip-image` (HTTPS or site-relative image path).
+The JSON Schema is at `/trip.schema.json`. Roamwise additionally checks real calendar dates, date ranges, ID references, and flight chronology. Its JSON Schema custom formats are `trip-date` (calendar date or empty draft), `trip-datetime` (ISO timestamp, UTC offset required), `trip-url` (HTTP/HTTPS URL), and `trip-image` (HTTPS URL).
 
-Legacy `roamwise/v1` round-trip flights migrate into two legs with half the old fare on each and an explicit warning. Downloading from the website emits v2. The CLI never rewrites a file during validation or preview.
+The CLI never rewrites a file during validation or preview.

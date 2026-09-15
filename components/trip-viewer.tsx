@@ -19,7 +19,7 @@ import {
   type Stay,
   type TripDetails,
   type TripDocument,
-} from '@/lib/trip-schema';
+} from '@/packages/core/trip-schema';
 import {
   BedDouble,
   BookOpen,
@@ -605,8 +605,8 @@ export default function TripViewer({
       url: item.url ?? '',
       from: item.from,
       to: item.to,
-      depart: item.depart.slice(0, 16),
-      arrive: item.arrive.slice(0, 16),
+      depart: item.depart,
+      arrive: item.arrive,
     });
     setAddKind('flight');
   }

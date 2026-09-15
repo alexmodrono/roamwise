@@ -9,7 +9,7 @@ import {
   type Coordinates,
   type FlightLeg,
   type TripDocument,
-} from '@/lib/trip-schema';
+} from '@/packages/core/trip-schema';
 import {
   BedDouble,
   CalendarDays,
