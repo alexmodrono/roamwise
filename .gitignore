@@ -44,3 +44,6 @@ next-env.d.ts
 /public/downloads/*.tgz
 
 *.tsbuildinfo
+
+# Local hosting metadata must not be committed.
+.openai/
